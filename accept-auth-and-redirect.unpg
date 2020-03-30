@@ -49,15 +49,6 @@ Copyright Notice
    Copyright (c) 2020 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 1]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
-
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
    (https://trustee.ietf.org/license-info) in effect on the date of
@@ -70,23 +61,23 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
-   2.  Accept-Auth . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  The Redirect Authentication Scheme  . . . . . . . . . . . . .   4
-   4.  Mixing Redirection and Authentication Requests  . . . . . . .   5
-     4.1.  3xx Responses with WWW-Authenticate . . . . . . . . . . .   6
-     4.2.  401 Responses with Location . . . . . . . . . . . . . . .   6
-   5.  Auth-params for Selected Authentication Mechanisms  . . . . .   6
-   6.  Server-Side Selection of Authentication Schemes . . . . . . .   7
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-   9.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-     9.1.  Multi-Level Negotiation . . . . . . . . . . . . . . . . .   8
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .   8
-     10.2.  Informative References . . . . . . . . . . . . . . . . .   9
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   9
+   1.  Introduction
+     1.1.  Requirements Language
+   2.  Accept-Auth
+   3.  The Redirect Authentication Scheme
+   4.  Mixing Redirection and Authentication Requests
+     4.1.  3xx Responses with WWW-Authenticate
+     4.2.  401 Responses with Location
+   5.  Auth-params for Selected Authentication Mechanisms
+   6.  Server-Side Selection of Authentication Schemes
+   7.  Acknowledgements
+   8.  IANA Considerations
+   9.  Security Considerations
+     9.1.  Multi-Level Negotiation
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
+   Author's Address
 
 1.  Introduction
 
@@ -103,16 +94,6 @@ Table of Contents
    Tokens (JWT) [RFC7519] and Negotiate [RFC4559] are both used, the
    latter usually with the Kerberos [RFC4120] GSS-API [RFC2743]
    mechanism [RFC4121].
-
-
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 2]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
 
    We address this problem by adding a new request header, "Accept-
    Auth:", by which a user-agent can indicate which HTTP authentication
@@ -142,33 +123,6 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
    Accept-Auth values are similar to WWW-Authenticate values [RFC7235],
    but they do not have quite the same form, and they are not
    challenges.  Using ABNF [RFC5234]:"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 3]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
 
    ; Can we use the RFC7230 #rule ABNF extension here?
    Accept-Auth-values = Accept-Auth-value *( OWS ","
@@ -218,14 +172,6 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
    Here we define the "Redirect" HTTP authentication scheme, consisting
    of these behaviors:
 
-
-
-
-Williams                 Expires October 1, 2020                [Page 4]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
-
    o  Servers needing to authenticate the user when the user-agent has
       advertised support for the Redirect authentication scheme SHOULD
       respond with a 401 with a "challenge" for the Redirect
@@ -269,18 +215,6 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
    Additionally, user-agents conforming to this specification MUST
    support the two cases described below as a degenerate form of the
    Redirect authentication scheme.
-
-
-
-
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 5]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
 
 4.1.  3xx Responses with WWW-Authenticate
 
@@ -329,14 +263,6 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
       an auth-param, "auth-svcs" whose value is a list of whitespace-
       separated domainnames that the user-agent will follow redirections
       to.
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 6]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
 
 6.  Server-Side Selection of Authentication Schemes
 
@@ -387,13 +313,6 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
    agent's fingerprint, at the cost of limiting the server's knowledge
    of what authentication schemes the user-agent supports.
 
-
-
-Williams                 Expires October 1, 2020                [Page 7]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
-
 9.1.  Multi-Level Negotiation
 
    One important security consideration of the Accept-Auth header is
@@ -439,16 +358,6 @@ Internet-Draft           Accept-Auth & Redirect               March 2020
               Kerberos and NTLM HTTP Authentication in Microsoft
               Windows", RFC 4559, DOI 10.17487/RFC4559, June 2006,
               <https://www.rfc-editor.org/info/rfc4559>.
-
-
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 8]
-
-Internet-Draft           Accept-Auth & Redirect               March 2020
-
 
    [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
               Specifications: ABNF", STD 68, RFC 5234,
@@ -496,9 +405,3 @@ Author's Address
 
    Email: nico@cryptonector.com
 
-
-
-
-
-
-Williams                 Expires October 1, 2020                [Page 9]

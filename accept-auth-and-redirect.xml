@@ -23,7 +23,7 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
-<rfc category="std" docName="draft-williams-http-accept-auth-and-redirect-00" ipr="trust200902">
+<rfc category="std" docName="draft-williams-http-accept-auth-and-redirect-01" ipr="trust200902">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
      you can add the attributes updates="NNNN" and obsoletes="NNNN" 
@@ -67,7 +67,7 @@
     <abstract>
       <t>
         The Hyper-Text Transport Protocol (HTTP) offers several
-        authentication chemes, but many sites use redirection-based
+        authentication schemes, but many sites use redirection-based
         protocols to authenticate users. Some servers are faced with a
         connundrum, having to choose between two mutually-exclusive
         options: redirect responses or 401 (authentication required)
@@ -224,9 +224,10 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           </t>
 
           <t>
-            User-agents MAY consult the user, or a white-list of acceptable
-            origins for redirections, in order to decide whether to follow
-            the redirection.
+            User-agents SHOULD consult the user (if interactive), and/or
+            a local policy (e.g., a white-list of acceptable origins for
+            redirections), in order to decide whether to follow the
+            redirection.
           </t>
 
           <t>
@@ -238,6 +239,11 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
             original method.
           </t>
         </list>
+      </t>
+
+      <t>
+        Note that nothing in this document alters Cross-Origin Resource
+        Sharing considerations regarding redirections.
       </t>
     </section>
 
@@ -345,8 +351,8 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
 
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
-        Viktor Dukhovni, Bill Bernsen, and Geoffrey Thomas, provided
-        feedback and some review.
+        Simo Sorce, Viktor Dukhovni, Bill Bernsen, and Geoffrey Thomas,
+        provided feedback and some review.
       </t>
     </section>
 
@@ -374,6 +380,14 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         security considerations include multi-level negotiation issues
         <xref target="multi_level_nego"/>, as well as a privacy concern:
         that the Accept-Auth header may help fingerprint user-agents.
+      </t>
+
+      <t>
+        One non-concern is that servers could cause user-agents to
+        engage in authentication schemes they shouldn't want to -- that
+        is a possibility regardless of whether the user-agent advertises
+        support for an authentication scheme or not.  As usual, local
+        policy is relevant.
       </t>
 
       <t>
