@@ -13,6 +13,7 @@
   <!ENTITY RFC7235 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml">
   <!ENTITY RFC7519 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml">
   <!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
+  <!ENTITY InvokeWebRequest "https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-7">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -93,11 +94,11 @@
         The Hyper-Text Transport Protocol (HTTP) <xref
       target="RFC7230">RFC7230</xref> provides several schemes for user
         authentication.  There also are popular ways of authenticating users
-        base on redirection rather than standard HTTP authentication schemes.
+        based on redirection rather than standard HTTP authentication schemes.
         Heretofore, HTTP has provided no standard way for servers to know
         which authentication schemes, including redirect-based methods, a
         given user-agent supports, but servers must choose between either
-        redirection, or HTTP authentication, and these two are mutually
+        redirection or HTTP authentication, and these two are mutually
         exclusive.
       </t>
 
@@ -179,23 +180,23 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
 
     <section anchor="redirect" title="The Redirect Authentication Scheme">
       <t>
-        Many sites use redirect-based protocols.  Often such sites depend on
-        user-agents being interactive browsers with JavaScript enabled so that
-        when authentication is completed at some remote authenticator service,
-        it can redirect the user-agent by changing the window location using
-        JavaScript after having performed an XmlHttpRequest back to the origin
-        with an Authorization header to obtain a cookie.  Such redirect-based
-        protocols do not work for non-browser user-agents.
+        Many sites use redirect-based protocols, with the final
+        redirection back to the origin effected via ECMAScript code in
+        order to be able to set an Authorization header.  Such
+        redirect-based protocols do not work for non-browser
+        user-agents.
       </t>
 
       <t>
         Normally, user-agents do not copy response headers from redirect
-        responses redirected requests. One common non-browser user-agent, the
-        PowerShell command-line user-agent, has an option that causes it to
-        copy Authorization headers from redirect responses to redirected
-        requests, which enables redirect-based workflows to work even though
-        that user-agent is not a browser, lacks interaction capabilities, HTML
-        rendering, or JavaScript support.
+        responses redirected requests.  One common non-browser
+        user-agent, the <eref target="&InvokeWebRequest;">PowerShell
+          command-line user-agent</eref>, has an option, <spanx
+          style="verb">-PreserveAuthorizationOnRedirect</spanx> that
+        causes it to copy Authorization headers from redirect responses
+        to redirected requests.  This enables redirect-based workflows
+        to work even though that user-agent is not a browser, lacks
+        interaction capabilities, HTML rendering, or JavaScript support.
       </t>
 
       <t>
@@ -224,10 +225,13 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           </t>
 
           <t>
-            User-agents SHOULD consult the user (if interactive), and/or
-            a local policy (e.g., a white-list of acceptable origins for
+            User-agents may consult the user (if interactive), and/or a
+            local policy (e.g., a white-list of acceptable origins for
             redirections), in order to decide whether to follow the
-            redirection.
+            redirection.  Note that the redirected-to service should
+            always have enough information to decide whether to accept
+            or reject a redirection (e.g., via the Referer header), and
+            SHOULD have and apply local policy of its own.
           </t>
 
           <t>
@@ -351,8 +355,8 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
 
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
-        Simo Sorce, Viktor Dukhovni, Bill Bernsen, and Geoffrey Thomas,
-        provided feedback and some review.
+        Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew Brown, and
+        Geoffrey Thomas provided feedback and some review.
       </t>
     </section>
 
@@ -380,6 +384,13 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         security considerations include multi-level negotiation issues
         <xref target="multi_level_nego"/>, as well as a privacy concern:
         that the Accept-Auth header may help fingerprint user-agents.
+      </t>
+
+      <t>
+        Also, the Authorization header preservation behavior allows
+        attackers to convey malformed tokens to victim servers, allowing
+        them to probe for parsing bugs.  However, this is essentially
+        already true for the URI itself.
       </t>
 
       <t>

@@ -77,18 +77,19 @@ Table of Contents
    10. References
      10.1.  Normative References
      10.2.  Informative References
+     10.3.  URIs
    Author's Address
 
 1.  Introduction
 
    The Hyper-Text Transport Protocol (HTTP) RFC7230 [RFC7230] provides
    several schemes for user authentication.  There also are popular ways
-   of authenticating users base on redirection rather than standard HTTP
-   authentication schemes.  Heretofore, HTTP has provided no standard
-   way for servers to know which authentication schemes, including
-   redirect-based methods, a given user-agent supports, but servers must
-   choose between either redirection, or HTTP authentication, and these
-   two are mutually exclusive.
+   of authenticating users based on redirection rather than standard
+   HTTP authentication schemes.  Heretofore, HTTP has provided no
+   standard way for servers to know which authentication schemes,
+   including redirect-based methods, a given user-agent supports, but
+   servers must choose between either redirection or HTTP
+   authentication, and these two are mutually exclusive.
 
    This situation arises especially in corporate networks where JSON Web
    Tokens (JWT) [RFC7519] and Negotiate [RFC4559] are both used, the
@@ -152,22 +153,19 @@ Table of Contents
 
 3.  The Redirect Authentication Scheme
 
-   Many sites use redirect-based protocols.  Often such sites depend on
-   user-agents being interactive browsers with JavaScript enabled so
-   that when authentication is completed at some remote authenticator
-   service, it can redirect the user-agent by changing the window
-   location using JavaScript after having performed an XmlHttpRequest
-   back to the origin with an Authorization header to obtain a cookie.
-   Such redirect-based protocols do not work for non-browser user-
-   agents.
+   Many sites use redirect-based protocols, with the final redirection
+   back to the origin effected via ECMAScript code in order to be able
+   to set an Authorization header.  Such redirect-based protocols do not
+   work for non-browser user-agents.
 
    Normally, user-agents do not copy response headers from redirect
    responses redirected requests.  One common non-browser user-agent,
-   the PowerShell command-line user-agent, has an option that causes it
-   to copy Authorization headers from redirect responses to redirected
-   requests, which enables redirect-based workflows to work even though
-   that user-agent is not a browser, lacks interaction capabilities,
-   HTML rendering, or JavaScript support.
+   the PowerShell command-line user-agent [1], has an option,
+   "-PreserveAuthorizationOnRedirect" that causes it to copy
+   Authorization headers from redirect responses to redirected requests.
+   This enables redirect-based workflows to work even though that user-
+   agent is not a browser, lacks interaction capabilities, HTML
+   rendering, or JavaScript support.
 
    Here we define the "Redirect" HTTP authentication scheme, consisting
    of these behaviors:
@@ -186,10 +184,13 @@ Table of Contents
    o  User-agents SHOULD also consider challenges for other
       authentication schemes offered by the server.
 
-   o  User-agents SHOULD consult the user (if interactive), and/or a
-      local policy (e.g., a white-list of acceptable origins for
+   o  User-agents may consult the user (if interactive), and/or a local
+      policy (e.g., a white-list of acceptable origins for
       redirections), in order to decide whether to follow the
-      redirection.
+      redirection.  Note that the redirected-to service should always
+      have enough information to decide whether to accept or reject a
+      redirection (e.g., via the Referer header), and SHOULD have and
+      apply local policy of its own.
 
    o  Because the intent of a Redirect challenge is to authenticate, if
       the user-agent decides to follow the redirection, then the user-
@@ -279,8 +280,8 @@ Table of Contents
 
 7.  Acknowledgements
 
-   Simo Sorce, Viktor Dukhovni, Bill Bernsen, and Geoffrey Thomas,
-   provided feedback and some review.
+   Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew Brown, and Geoffrey
+   Thomas provided feedback and some review.
 
 8.  IANA Considerations
 
@@ -302,6 +303,11 @@ Table of Contents
    considerations include multi-level negotiation issues Section 9.1, as
    well as a privacy concern: that the Accept-Auth header may help
    fingerprint user-agents.
+
+   Also, the Authorization header preservation behavior allows attackers
+   to convey malformed tokens to victim servers, allowing them to probe
+   for parsing bugs.  However, this is essentially already true for the
+   URI itself.
 
    One non-concern is that servers could cause user-agents to engage in
    authentication schemes they shouldn't want to -- that is a
@@ -395,6 +401,12 @@ Table of Contents
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <https://www.rfc-editor.org/info/rfc7519>.
+
+10.3.  URIs
+
+   [1] https://docs.microsoft.com/en-
+       us/powershell/module/microsoft.powershell.utility/invoke-
+       webrequest?view=powershell-7
 
 Author's Address
 
