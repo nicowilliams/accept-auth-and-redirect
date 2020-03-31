@@ -376,20 +376,21 @@
   <link href="#rfc.toc" rel="Contents">
 <link href="#rfc.section.1" rel="Chapter" title="1 Introduction">
 <link href="#rfc.section.1.1" rel="Chapter" title="1.1 Requirements Language">
-<link href="#rfc.section.2" rel="Chapter" title="2 Accept-Auth">
-<link href="#rfc.section.3" rel="Chapter" title="3 The Redirect Authentication Scheme">
-<link href="#rfc.section.4" rel="Chapter" title="4 Mixing Redirection and Authentication Requests">
-<link href="#rfc.section.4.1" rel="Chapter" title="4.1 3xx Responses with WWW-Authenticate">
-<link href="#rfc.section.4.2" rel="Chapter" title="4.2 401 Responses with Location">
-<link href="#rfc.section.5" rel="Chapter" title="5 Auth-params for Selected Authentication Mechanisms">
-<link href="#rfc.section.6" rel="Chapter" title="6 Server-Side Selection of Authentication Schemes">
-<link href="#rfc.section.7" rel="Chapter" title="7 Acknowledgements">
-<link href="#rfc.section.8" rel="Chapter" title="8 IANA Considerations">
-<link href="#rfc.section.9" rel="Chapter" title="9 Security Considerations">
-<link href="#rfc.section.9.1" rel="Chapter" title="9.1 Multi-Level Negotiation">
-<link href="#rfc.references" rel="Chapter" title="10 References">
-<link href="#rfc.references.1" rel="Chapter" title="10.1 Normative References">
-<link href="#rfc.references.2" rel="Chapter" title="10.2 Informative References">
+<link href="#rfc.section.2" rel="Chapter" title="2 Accept-Redirect and       Accept-Redirect-Auth">
+<link href="#rfc.section.3" rel="Chapter" title="3 Accept-Auth">
+<link href="#rfc.section.4" rel="Chapter" title="4 The Redirect Authentication Scheme">
+<link href="#rfc.section.5" rel="Chapter" title="5 Mixing Redirection and Authentication Requests">
+<link href="#rfc.section.5.1" rel="Chapter" title="5.1 3xx Responses with WWW-Authenticate">
+<link href="#rfc.section.5.2" rel="Chapter" title="5.2 401 Responses with Location">
+<link href="#rfc.section.6" rel="Chapter" title="6 Auth-params for Selected Authentication Mechanisms">
+<link href="#rfc.section.7" rel="Chapter" title="7 Server-Side Selection of Authentication Schemes">
+<link href="#rfc.section.8" rel="Chapter" title="8 Acknowledgements">
+<link href="#rfc.section.9" rel="Chapter" title="9 IANA Considerations">
+<link href="#rfc.section.10" rel="Chapter" title="10 Security Considerations">
+<link href="#rfc.section.10.1" rel="Chapter" title="10.1 Multi-Level Negotiation">
+<link href="#rfc.references" rel="Chapter" title="11 References">
+<link href="#rfc.references.1" rel="Chapter" title="11.1 Normative References">
+<link href="#rfc.references.2" rel="Chapter" title="11.2 Informative References">
 <link href="#rfc.authors" rel="Chapter">
 
 
@@ -398,9 +399,9 @@
 
   <meta name="dct.creator" content="Williams, N., Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-williams-http-accept-auth-and-redirect-01" />
-  <meta name="dct.issued" scheme="ISO8601" content="2020-30" />
-  <meta name="dct.abstract" content="The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users. Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  " />
-  <meta name="description" content="The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users. Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  " />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-31" />
+  <meta name="dct.abstract" content="The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users.  Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  " />
+  <meta name="description" content="The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users.  Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  " />
 
 </head>
 
@@ -419,10 +420,10 @@
 </tr>
 <tr>
 <td class="left">Intended status: Standards Track</td>
-<td class="right">March 30, 2020</td>
+<td class="right">March 31, 2020</td>
 </tr>
 <tr>
-<td class="left">Expires: October 1, 2020</td>
+<td class="left">Expires: October 2, 2020</td>
 <td class="right"></td>
 </tr>
 
@@ -434,13 +435,14 @@
   <span class="filename">draft-williams-http-accept-auth-and-redirect-01</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
-<p>The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users. Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  </p>
-<p>This document specifies a new HTTP request header, "Accept-Auth", that user-agents may use to indicate their authentication capabilities, including support (or not) for chasing redirects.  Also specified is a new HTTP authentication scheme named Redirect, operating via 3xx or 401 responses at the server's choice.  </p>
+<p>The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users.  Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  </p>
+<p>This document specifies new HTTP request headers by which many applications can improve interoperability even without changing their HTTP implementations.  These new headers allow user-agents to advertise authentication- and redirect-related capbilities that servers can use to better make authentication and/or redirect decisions.  </p>
+<p>Also specified is a new HTTP authentication scheme named "Redirect" that enables communication between redirecting and redirected authorities via preservation of "Authorization" and "Authorization-Request" headers across redirections.  This enables arbitrary authentication and authorization protocols to work without requiring user-agent support for them.  </p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on October 1, 2020.</p>
+<p>This Internet-Draft will expire on October 2, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -454,33 +456,35 @@
 </li>
 <ul><li>1.1.   <a href="#rfc.section.1.1">Requirements Language</a>
 </li>
-</ul><li>2.   <a href="#rfc.section.2">Accept-Auth</a>
+</ul><li>2.   <a href="#rfc.section.2">Accept-Redirect and       Accept-Redirect-Auth</a>
 </li>
-<li>3.   <a href="#rfc.section.3">The Redirect Authentication Scheme</a>
+<li>3.   <a href="#rfc.section.3">Accept-Auth</a>
 </li>
-<li>4.   <a href="#rfc.section.4">Mixing Redirection and Authentication Requests</a>
+<li>4.   <a href="#rfc.section.4">The Redirect Authentication Scheme</a>
 </li>
-<ul><li>4.1.   <a href="#rfc.section.4.1">3xx Responses with WWW-Authenticate</a>
+<li>5.   <a href="#rfc.section.5">Mixing Redirection and Authentication Requests</a>
 </li>
-<li>4.2.   <a href="#rfc.section.4.2">401 Responses with Location</a>
+<ul><li>5.1.   <a href="#rfc.section.5.1">3xx Responses with WWW-Authenticate</a>
 </li>
-</ul><li>5.   <a href="#rfc.section.5">Auth-params for Selected Authentication Mechanisms</a>
+<li>5.2.   <a href="#rfc.section.5.2">401 Responses with Location</a>
 </li>
-<li>6.   <a href="#rfc.section.6">Server-Side Selection of Authentication Schemes</a>
+</ul><li>6.   <a href="#rfc.section.6">Auth-params for Selected Authentication Mechanisms</a>
 </li>
-<li>7.   <a href="#rfc.section.7">Acknowledgements</a>
+<li>7.   <a href="#rfc.section.7">Server-Side Selection of Authentication Schemes</a>
 </li>
-<li>8.   <a href="#rfc.section.8">IANA Considerations</a>
+<li>8.   <a href="#rfc.section.8">Acknowledgements</a>
 </li>
-<li>9.   <a href="#rfc.section.9">Security Considerations</a>
+<li>9.   <a href="#rfc.section.9">IANA Considerations</a>
 </li>
-<ul><li>9.1.   <a href="#rfc.section.9.1">Multi-Level Negotiation</a>
+<li>10.   <a href="#rfc.section.10">Security Considerations</a>
 </li>
-</ul><li>10.   <a href="#rfc.references">References</a>
+<ul><li>10.1.   <a href="#rfc.section.10.1">Multi-Level Negotiation</a>
 </li>
-<ul><li>10.1.   <a href="#rfc.references.1">Normative References</a>
+</ul><li>11.   <a href="#rfc.references">References</a>
 </li>
-<li>10.2.   <a href="#rfc.references.2">Informative References</a>
+<ul><li>11.1.   <a href="#rfc.references.1">Normative References</a>
+</li>
+<li>11.2.   <a href="#rfc.references.2">Informative References</a>
 </li>
 </ul><li><a href="#rfc.authors">Author's Address</a>
 </li>
@@ -493,16 +497,20 @@
 </h1>
 <p id="rfc.section.1.p.1">The Hyper-Text Transport Protocol (HTTP) <a href="#RFC7230" class="xref">RFC7230</a> provides several schemes for user authentication.  There also are popular ways of authenticating users based on redirection rather than standard HTTP authentication schemes.  Heretofore, HTTP has provided no standard way for servers to know which authentication schemes, including redirect-based methods, a given user-agent supports, but servers must choose between either redirection or HTTP authentication, and these two are mutually exclusive.  </p>
 <p id="rfc.section.1.p.2">This situation arises especially in corporate networks where JSON Web Tokens (JWT) <a href="#RFC7519" class="xref">[RFC7519]</a> and Negotiate <a href="#RFC4559" class="xref">[RFC4559]</a> are both used, the latter usually with the Kerberos <a href="#RFC4120" class="xref">[RFC4120]</a> GSS-API <a href="#RFC2743" class="xref">[RFC2743]</a> mechanism <a href="#RFC4121" class="xref">[RFC4121]</a>.  </p>
-<p id="rfc.section.1.p.3">We address this problem by adding a new request header, "Accept-Auth:", by which a user-agent can indicate which HTTP authentication schemes, if any, it supports, including redirection.  </p>
+<p id="rfc.section.1.p.3">We address this problem by adding new request headers, "Accept-Auth:", "Accept-Redirect-Auth:", and "Accept-Redirect:" by which a user-agent can indicate which HTTP authentication schemes, if any, it supports, including redirection.  </p>
 <h1 id="rfc.section.1.1">
 <a href="#rfc.section.1.1">1.1.</a> Requirements Language</h1>
 <p id="rfc.section.1.1.p.1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <a href="#RFC2119" class="xref">RFC 2119</a>.  </p>
 <h1 id="rfc.section.2">
-<a href="#rfc.section.2">2.</a> <a href="#accept_auth" id="accept_auth">Accept-Auth</a>
+<a href="#rfc.section.2">2.</a> <a href="#accept_redirect" id="accept_redirect">Accept-Redirect and       Accept-Redirect-Auth</a>
 </h1>
-<p id="rfc.section.2.p.1">The Accept-Auth request header may have multiple values, or be present multiple times, as with most HTTP headers.  Each value names one authentication schemes, and optionally may indicate schemes-specific metadata.  </p>
-<p id="rfc.section.2.p.2">One special value, a single asterisk, indicates that the user-agent is unwilling to list the authentication schemes it supports, but if sent, the server MAY assume that the user-agent supports redirection. Another special value, "None", indicates that the user-agent has no credentials and does not support even redirection.  User-agents SHOULD send no more than one special value, and SHOULD NOT send other values if they send one of those special values.  </p>
-<p id="rfc.section.2.p.3">Accept-Auth values are similar to WWW-Authenticate values <a href="#RFC7235" class="xref">[RFC7235]</a>, but they do not have quite the same form, and they are not challenges.  Using ABNF <a href="#RFC5234" class="xref">[RFC5234]</a>:"</p>
+<p id="rfc.section.2.p.1">The Accept-Redirect request header has two possible values: "yes" and "no".  If "yes", this means the user-agent will follow redirections, and the user-agent may or may not be willing to authenticate at the redirected origin depending on local policy.  </p>
+<p id="rfc.section.2.p.2">The Accept-Redirect-Auth request header exists to indicate which authorities the user-agent is willing to redirect to and authenticate at.  Its value is a whitespace-separate list of domainnames.  If empty or has just the value ".", then the service can conclude only that the user-agent has a whitelist, but is not disclosing it.  </p>
+<h1 id="rfc.section.3">
+<a href="#rfc.section.3">3.</a> <a href="#accept_auth" id="accept_auth">Accept-Auth</a>
+</h1>
+<p id="rfc.section.3.p.1">The Accept-Auth request header may have multiple values, or be present multiple times, as with most HTTP headers.  Each value names one authentication schemes, and optionally may indicate schemes-specific metadata.  </p>
+<p id="rfc.section.3.p.2">Accept-Auth values are similar to WWW-Authenticate values <a href="#RFC7235" class="xref">[RFC7235]</a>, but they do not have quite the same form, and they are not challenges.  Using ABNF <a href="#RFC5234" class="xref">[RFC5234]</a>:" </p>
 <div id="rfc.figure.1"></div>
 <div id="accept_auth_abnf"></div>
 <p></p>
@@ -512,11 +520,7 @@ Accept-Auth-values = Accept-Auth-value *( OWS ","
                                           OWS Accept-Auth-value )
 Accept-Auth-value = auth-scheme [1*SP
                                  ( auth-param *( "+" auth-param ) ]
-; The * auth-scheme indicates that the user-agent supports at least
-; the use of redirection, and may support other schemes but does not
-; wish to indicate which.  The None auth-scheme indicates that the
-; user-agent does not wish to authenticate in any way.
-auth-scheme = "*" / "None" / token
+auth-scheme = token
 auth-param = token BWS "=" BWS ( token / quoted-string )
 token          = 1*tchar
 tchar          = "!" / "'" / "*" / "-" / "." / "^"
@@ -531,39 +535,60 @@ quoted-string = &lt;quoted-string, see [RFC7230], Section 3.2.6&gt;
             </pre>
 <p>Accept-Auth value ABNF.</p>
 <p class="figure">Figure 1</p>
-<h1 id="rfc.section.3">
-<a href="#rfc.section.3">3.</a> <a href="#redirect" id="redirect">The Redirect Authentication Scheme</a>
+<h1 id="rfc.section.4">
+<a href="#rfc.section.4">4.</a> <a href="#redirect" id="redirect">The Redirect Authentication Scheme</a>
 </h1>
-<p id="rfc.section.3.p.1">Many sites use redirect-based protocols, with the final redirection back to the origin effected via ECMAScript code in order to be able to set an Authorization header.  Such redirect-based protocols do not work for non-browser user-agents.  </p>
-<p id="rfc.section.3.p.2">Normally, user-agents do not copy response headers from redirect responses redirected requests.  One common non-browser user-agent, the <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-7">PowerShell command-line user-agent</a>, has an option, <samp>-PreserveAuthorizationOnRedirect</samp> that causes it to copy Authorization headers from redirect responses to redirected requests.  This enables redirect-based workflows to work even though that user-agent is not a browser, lacks interaction capabilities, HTML rendering, or JavaScript support.  </p>
-<p id="rfc.section.3.p.3">Here we define the "Redirect" HTTP authentication scheme, consisting of these behaviors: </p>
+<p id="rfc.section.4.p.1">Many sites use redirect-based protocols for authentication.  such protocols exchange cryptographic messages between a relying party origin and an authenticator origin.  Some such protocols use URI query parameters to carry cryptographic messages.  Others depend on the browser HTML and ECMAScript ecosystem, using a script to run HTTP requests from the authenticator to the relying party with a token in Authorization request header.  In the latter case, the server exchanges the token for a cookie, and a script on the authenticator page then effects a redirect by changing the window location.  </p>
+<p id="rfc.section.4.p.2">Such redirect-based protocols do not work for non-browser user-agents.  </p>
+<p id="rfc.section.4.p.3">User-agents normally do not copy response headers from redirect responses redirected requests.  One common non-browser user-agent, the <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-7">PowerShell command-line user-agent</a>, has an option, <samp>-PreserveAuthorizationOnRedirect</samp> that causes it to copy Authorization headers from redirect responses to redirected requests.  This enables some redirect-based workflows to work even though that user-agent is not a browser, lacks interaction capabilities, HTML rendering, or JavaScript support.  </p>
+<p id="rfc.section.4.p.4">Here we define the "Redirect" HTTP authentication scheme.  This scheme lets arbitrary authentication (and authorization) protocols exchange cryptographic messages between the relying party origin and the authenticator origin over headers rather than URI parameters.  This is done by preserving a new header, "Authorization-Request" across redirects, and the existing "Authorization" header across redirects back to previous origins in the redirect chain.  </p>
+<p id="rfc.section.4.p.5">For our purposes, a "redirect response" is either a 3xx redirect response with a Location header, or a 401 response with a WWW-Authenticate header naming the Redirect authentication scheme and a Location header.  </p>
+<p></p>
 
 <ul>
-<li>Servers needing to authenticate the user when the user-agent has advertised support for the Redirect authentication scheme SHOULD respond with a 401 with a "challenge" for the Redirect authentication scheme, in which case servers MUST include a Location header, and MAY include an Authorization header in the response that the user-agent then MUST copy to the redirected request if it chooses to follow the redirection.  </li>
-<li>User-agents MUST recognize a 401 Redirect challenge as a form of redirection.  </li>
-<li>User-agents SHOULD also consider challenges for other authentication schemes offered by the server.  </li>
-<li>User-agents may consult the user (if interactive), and/or a local policy (e.g., a white-list of acceptable origins for redirections), in order to decide whether to follow the redirection.  Note that the redirected-to service should always have enough information to decide whether to accept or reject a redirection (e.g., via the Referer header), and SHOULD have and apply local policy of its own.  </li>
-<li>Because the intent of a Redirect challenge is to authenticate, if the user-agent decides to follow the redirection, then the user-agent SHOULD use switch to the GET method for the redirected request, and upon being redirected back to the original server, the user-agent MUST switch back to the original method.  </li>
+<li>User-agents that support the Redirect HTTP authentication scheme MUST recognize a 401 Redirect challenge as a redirect response.  <ul class="empty">
+<li><a id="COMMENT_0" class="info">[COMMENT_0]<span class="info">NW: QUESTION: What, if anything, should we say about the method used by the user-agent when chasing a redirection? </span></a></li>
+<li><a id="COMMENT_1" class="info">[COMMENT_1]<span class="info">NW: One possibility is to let the redirecting origin specify the method and state some constraints (e.g., if the original method cannot have a request body, then the next method must be GET, else ???).  </span></a></li>
+<li><a id="COMMENT_2" class="info">[COMMENT_2]<span class="info">NW: Since the intent is to authenticate the user, a GET should always be good enough.  In particular, the authenticator origin may not need to see the original request body at all.  </span></a></li>
+</ul>
+<p> </p>
+</li>
+<li>User-agents SHOULD also consider challenges for other authentication schemes offered by the server.  E.g., if the server offers a Negotiate <a href="#RFC4559" class="xref">[RFC4559]</a> challenge and a Redirect challenge, the user-agent may choose either (or neither) of the two.  </li>
+<li>User-agents that support the Redirect HTTP authentication scheme MUST copy any Authorization-Request headers in redirect responses to the redirected request.  </li>
+<li>User-agents that support the Redirect HTTP authentication scheme MUST copy any Authorization headers in redirect responses to the redirected request when the redirect is to an origin seen earlier in the same redirect chain.  </li>
+<li>Servers needing to authenticate the user when the user-agent has advertised support for the Redirect authentication scheme SHOULD respond with a 401 with a "challenge" for the Redirect authentication scheme and a Location header, and MAY include an Authorization-Request header in the response that the user-agent then MUST copy to the redirected request if it chooses to follow the redirection.  </li>
+<li>Servers that have been redirected to MUST apply local policy to decide: <ul>
+<li>whether to accept redirections from the redirecting origin;</li>
+<li>whether to further redirect the request (as usual) and whether to set an Authorization-Request header in the redirect response; </li>
+<li>whether to authenticate the user (as usual);</li>
+<li>whether to redirect back to the redirecting origin, and whether to set an Authorization header in the redirect response.  </li>
+</ul>
+<p> </p>
+</li>
+<li>User-agents may consult the user (if interactive), and/or a local policy (e.g., a white-list of acceptable origins for redirections), in order to decide whether to follow the redirection.  </li>
+<li>Note that the redirected-to service should always have enough information to decide whether to accept or reject a redirection (e.g., via the Referer header), and MUST have and apply local policy of its own.  </li>
 </ul>
 
 <p> </p>
-<p id="rfc.section.3.p.4">Note that nothing in this document alters Cross-Origin Resource Sharing considerations regarding redirections.  </p>
-<h1 id="rfc.section.4">
-<a href="#rfc.section.4">4.</a> <a href="#mixing" id="mixing">Mixing Redirection and Authentication Requests</a>
-</h1>
-<p id="rfc.section.4.p.1">In HTTP, servers can either respond with a 3xx redirect, or a 401, but not both at once.  Besides the status codes, there is also response header content that is relevant to effecting a redirect or requesting authentication -- these two can be combined even if the status codes cannot.  Existing user-agents wouldn't respond in the obvious way because their response is generally keyed off of the server's response status code.  </p>
-<p id="rfc.section.4.p.2">User-agents that conform to this specification MUST support the Redirect authentication scheme as described in <a href="#redirect" class="xref">Section 3</a>.  Additionally, user-agents conforming to this specification MUST support the two cases described below as a degenerate form of the Redirect authentication scheme.  </p>
-<h1 id="rfc.section.4.1">
-<a href="#rfc.section.4.1">4.1.</a> <a href="#redirect_plus_auth" id="redirect_plus_auth">3xx Responses with WWW-Authenticate</a>
-</h1>
-<p id="rfc.section.4.1.p.1">If a server responds with a 3xx and includes not only a Location header but also a WWW-Authenticate header, then the redirect denotes intent to authenticate the user.  In this case, the user-agent SHALL consider the response to be either a redirect or a request to authenticate, at the user-agent's choice.  The HTTP method to use at the new Location SHALL be as specified for the status code used by the server.  </p>
-<h1 id="rfc.section.4.2">
-<a href="#rfc.section.4.2">4.2.</a> <a href="#auth_plus_location" id="auth_plus_location">401 Responses with Location</a>
-</h1>
-<p id="rfc.section.4.2.p.1">If a server responds with a 401 and includes not just a WWW-Authenticate header but also a Location header, then the Location header's presence denotes the intent to authenticate the user either via the server's authentication scheme offerings, or redirection.  In this case, a user-agent conforming to this specification SHALL consider the response to be either a redirect or a request to authenticate, at the user-agent's choice, and SHOULD pick and execute one of those two options.  The user-agent SHOULD use the GET method at the new Location, with the expectation of eventually being redirected back to the original URI authority, at which point the user-agent, if it chooses to retry the original request, SHOULD use the original method.  </p>
+<p id="rfc.section.4.p.7">Note that nothing in this document alters or obviates Cross-Origin Resource Sharing policy and considerations.  </p>
 <h1 id="rfc.section.5">
-<a href="#rfc.section.5">5.</a> Auth-params for Selected Authentication Mechanisms</h1>
-<p id="rfc.section.5.p.1">We specify here a few OPTIONAL parameters for existing HTTP authentication schemes that user-agents may use to convey relevant information to a server.  </p>
+<a href="#rfc.section.5">5.</a> <a href="#mixing" id="mixing">Mixing Redirection and Authentication Requests</a>
+</h1>
+<p id="rfc.section.5.p.1">Making use of the new Accept-Auth, Accept-Redirect, and Accept-Redirect-Auth request headers will often require no changes to existing HTTP user-agents and servers.  This is because the application usually gets to set and inspect arbitrary headers.  On the server side it may be difficult for an application to add support for the Redirect authentication scheme without modifying the HTTP server.  Therefore it may be difficult for an application to issue a 401 Redirect, and it may have to use a 3xx redirect instead.  </p>
+<p id="rfc.section.5.p.2">Therefore, user-agents MUST treat 3xx and 401 Redirect responses similarly, applying the same local policy in either case.  </p>
+<h1 id="rfc.section.5.1">
+<a href="#rfc.section.5.1">5.1.</a> <a href="#redirect_plus_auth" id="redirect_plus_auth">3xx Responses with WWW-Authenticate</a>
+</h1>
+<p id="rfc.section.5.1.p.1">If a server responds with a 3xx and includes not only a Location header but also a WWW-Authenticate header, then the redirect denotes intent to authenticate the user.  In this case, the user-agent SHALL consider the response to be either a redirect or a request to authenticate, at the user-agent's choice.  The HTTP method to use at the new Location SHALL be as specified for the status code used by the server.  </p>
+<p id="rfc.section.5.1.p.2">Note that many user-agents will not understand that such responses represent an option to authenticate with some authentication scheme.  </p>
+<h1 id="rfc.section.5.2">
+<a href="#rfc.section.5.2">5.2.</a> <a href="#auth_plus_location" id="auth_plus_location">401 Responses with Location</a>
+</h1>
+<p id="rfc.section.5.2.p.1">If a server responds with a 401 and includes not just a WWW-Authenticate header but also a Location header, then the Location header's presence denotes the intent to authenticate the user either via the server's authentication scheme offerings, or redirection.  In this case, a user-agent conforming to this specification SHALL consider the response to be either a redirect or a request to authenticate, at the user-agent's choice, and SHOULD pick and execute one of those two options.  The user-agent SHOULD use the GET method at the new Location, with the expectation of eventually being redirected back to the original URI authority, at which point the user-agent, if it chooses to retry the original request, SHOULD use the original method.  </p>
+<p id="rfc.section.5.2.p.2">Note that many user-agents will not understand that such responses represent an option to chase a redirection.  </p>
+<h1 id="rfc.section.6">
+<a href="#rfc.section.6">6.</a> Auth-params for Selected Authentication Mechanisms</h1>
+<p id="rfc.section.6.p.1">We specify here a few OPTIONAL parameters for existing HTTP authentication schemes that user-agents may use to convey relevant information to a server.  </p>
 <p></p>
 
 <ul>
@@ -574,35 +599,36 @@ quoted-string = &lt;quoted-string, see [RFC7230], Section 3.2.6&gt;
 </ul>
 
 <p> </p>
-<h1 id="rfc.section.6">
-<a href="#rfc.section.6">6.</a> Server-Side Selection of Authentication Schemes</h1>
-<p id="rfc.section.6.p.1">Servers that support only one authentication scheme have no difficulty choosing which scheme to use.  For other servers, when the user-agent does not include the Accept-Auth header in its request, we have no advice.  When a server supports multiple authentication schemes and the user-agent does include the Accept-Auth header in its request, then the server SHOULD select at least one scheme for a 401 response's WWW-Authenticate header that the user-agent also supports, but the server MAY respond with a 3xx redirect response if the user-agent advertised support for the Redirect scheme, or advertised the "*" special scheme name.  </p>
 <h1 id="rfc.section.7">
-<a href="#rfc.section.7">7.</a> <a href="#Acknowledgements" id="Acknowledgements">Acknowledgements</a>
-</h1>
-<p id="rfc.section.7.p.1">Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew Brown, and Geoffrey Thomas provided feedback and some review.  </p>
+<a href="#rfc.section.7">7.</a> Server-Side Selection of Authentication Schemes</h1>
+<p id="rfc.section.7.p.1">Servers that support only one authentication scheme have no difficulty choosing which scheme to use.  For other servers, when the user-agent does not include the Accept-Auth header in its request, we have no advice.  When a server supports multiple authentication schemes and the user-agent does include the Accept-Auth header in its request, then the server SHOULD select at least one scheme for a 401 response's WWW-Authenticate header that the user-agent also supports, but the server MAY respond with a 3xx redirect response if the user-agent indicated support for redirects via the Accept-Redirect header or by advertising support for the Redirect HTTP authentication scheme.  </p>
 <h1 id="rfc.section.8">
-<a href="#rfc.section.8">8.</a> IANA Considerations</h1>
-<p id="rfc.section.8.p.1">IANA is directed to register the Accept-Auth header in the message header registry, as well as the Redirect authentication scheme in the HTTP Authentication Scheme registry.  </p>
-<p id="rfc.section.8.p.2">There is no registry for auth-params for HTTP authentication schemes, nor do we request the creation of such a registry.  The auth-params used here bear some relation to those of the authentication schemes they are used with, but they are essentially a distinct namespace.  Future additions of auth-params for use in the Accept-Auth header will have to update this document.  </p>
+<a href="#rfc.section.8">8.</a> <a href="#Acknowledgements" id="Acknowledgements">Acknowledgements</a>
+</h1>
+<p id="rfc.section.8.p.1">Ben Kaduk, Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew Brown, and Geoffrey Thomas provided feedback and some review.  </p>
 <h1 id="rfc.section.9">
-<a href="#rfc.section.9">9.</a> <a href="#Security" id="Security">Security Considerations</a>
+<a href="#rfc.section.9">9.</a> IANA Considerations</h1>
+<p id="rfc.section.9.p.1">IANA is requested to assign an expert to run the Expert Review for the registration of the Accept-Auth, Accept-Redirect, Accept-Redirect-Auth, and Authorization-Request headers in the message header registry.  </p>
+<p id="rfc.section.9.p.2">Upon completion of IETF Review, IANA is directed to add the Redirect authentication scheme to the HTTP Authentication Scheme registry.  </p>
+<p id="rfc.section.9.p.3">There is no registry for auth-params for HTTP authentication schemes, nor do we request the creation of such a registry.  The auth-params used here bear some relation to those of the authentication schemes they are used with, but they are essentially a distinct namespace.  Future additions of auth-params for use in the Accept-Auth header will have to update this document.  </p>
+<h1 id="rfc.section.10">
+<a href="#rfc.section.10">10.</a> <a href="#Security" id="Security">Security Considerations</a>
 </h1>
-<p id="rfc.section.9.p.1">The Accept-Auth header is security-relevant as it helps negotiate authentication, which is a positive consideration.  Negative security considerations include multi-level negotiation issues <a href="#multi_level_nego" class="xref">Section 9.1</a>, as well as a privacy concern: that the Accept-Auth header may help fingerprint user-agents.  </p>
-<p id="rfc.section.9.p.2">Also, the Authorization header preservation behavior allows attackers to convey malformed tokens to victim servers, allowing them to probe for parsing bugs.  However, this is essentially already true for the URI itself.  </p>
-<p id="rfc.section.9.p.3">One non-concern is that servers could cause user-agents to engage in authentication schemes they shouldn't want to -- that is a possibility regardless of whether the user-agent advertises support for an authentication scheme or not.  As usual, local policy is relevant.  </p>
-<p id="rfc.section.9.p.4">The special Accept-Auth value '*' can be used to reduce the user-agent's fingerprint, at the cost of limiting the server's knowledge of what authentication schemes the user-agent supports.  </p>
-<h1 id="rfc.section.9.1">
-<a href="#rfc.section.9.1">9.1.</a> <a href="#multi_level_nego" id="multi_level_nego">Multi-Level Negotiation</a>
+<p id="rfc.section.10.p.1">The Accept-Auth header is security-relevant as it helps negotiate authentication, which is a positive consideration.  Negative security considerations include multi-level negotiation issues <a href="#multi_level_nego" class="xref">Section 10.1</a>, as well as a privacy concern: that the Accept-Auth header may help fingerprint user-agents.  </p>
+<p id="rfc.section.10.p.2">Privacy-conscious user-agents MAY have local policy about which authorities to use the new Accept-Auth, Accept-Redirect, and Accept-Redirect-Auth headers.  </p>
+<p id="rfc.section.10.p.3">Also, the Authorization-Request and Authorization header preservation behavior allows attackers to convey malformed tokens to victim servers, allowing them to probe for parsing bugs.  However, this is essentially already true for the URI itself, therefore this is not a new issue.  Note that Authorization headers are not to be preserved in all redirects, just those that backtrack in the redirect chain.  That means that there can be no confusion as to whether a given Authorization header was added by the user-agent or a redirecting origin: it will be either, but never both, and the relying party origins don't care which it is.  </p>
+<p id="rfc.section.10.p.4">One concern is that servers could cause user-agents to engage in authentication schemes they shouldn't want to -- that is a possibility regardless of whether the user-agent advertises support for an authentication scheme or not.  As usual, local policy is relevant.  For example, the "curl" user-agent by default will not chase redirections, and if enabled, it will by default not authenticate at any redirected authority (this can be further enabled).  User-agents SHOULD have local policy about which redirections they will accept, whether to authenticate to redirected authorities, and with what methods.  For example, a user-agent may be willing to use the Negotiate authentication scheme at some or any redirected authorities if it is happy to let Kerberos implementations, including Key Distribution Centers (KDCs), apply policy on the user-agent's behalf, but may not be willing to perform Basic, Digest, or SCRAM authentication to any redirected authorities not on a local whitelist.  </p>
+<h1 id="rfc.section.10.1">
+<a href="#rfc.section.10.1">10.1.</a> <a href="#multi_level_nego" id="multi_level_nego">Multi-Level Negotiation</a>
 </h1>
-<p id="rfc.section.9.1.p.1">One important security consideration of the Accept-Auth header is that it may lead to multiple levels of negotiation (e.g., via the Negotiate <a href="#RFC4559" class="xref">[RFC4559]</a> authentication method).  Multi-level negotiations can fail to select to select a workable option, or may select a sub-optimal (e.g., less secure) option.  </p>
-<p id="rfc.section.9.1.p.2">For example, a user-agent might be able to use Digest authentication and Negotiate with some GSS-API <a href="#RFC2743" class="xref">[RFC2743]</a> mechanism X, while the server might be able to use Digest and Negotiate with some GSS-API mechanism Y, and the server might prefer Y.  If the server knows only that the user-agent supports Digest and Negotiate, but not that the user-agent does not support GSS-API mechanism Y, then the server may send a challenge to use Negotiate and then the whole negotiation will fail.  </p>
-<p id="rfc.section.9.1.p.3">In the above example the user-agent could recover by retrying without advertising Negotiate in its Accept-Auth header, but the user-agent is not likely to do this on account of that being too complex.  Neither the user-agent nor the server are likely to detect and recover from sub-optimal selections.  </p>
-<p id="rfc.section.9.1.p.4">To avoid this failure more, user-agents SHOULD use auth-params to convey information that the server might need to make an appropriate.  </p>
+<p id="rfc.section.10.1.p.1">One important security consideration of the Accept-Auth header is that it may lead to multiple levels of negotiation (e.g., via the Negotiate <a href="#RFC4559" class="xref">[RFC4559]</a> authentication method).  Multi-level negotiations can fail to select to select a workable option, or may select a sub-optimal (e.g., less secure) option.  </p>
+<p id="rfc.section.10.1.p.2">For example, a user-agent might be able to use Digest authentication and Negotiate with some GSS-API <a href="#RFC2743" class="xref">[RFC2743]</a> mechanism X, while the server might be able to use Digest and Negotiate with some GSS-API mechanism Y, and the server might prefer Y.  If the server knows only that the user-agent supports Digest and Negotiate, but not that the user-agent does not support GSS-API mechanism Y, then the server may send a challenge to use Negotiate and then the whole negotiation will fail.  </p>
+<p id="rfc.section.10.1.p.3">In the above example the user-agent could recover by retrying without advertising Negotiate in its Accept-Auth header, but the user-agent is not likely to do this on account of that being too complex.  Neither the user-agent nor the server are likely to detect and recover from sub-optimal selections.  </p>
+<p id="rfc.section.10.1.p.4">To avoid this failure more, user-agents SHOULD use auth-params to convey information that the server might need to make an appropriate.  </p>
 <h1 id="rfc.references">
-<a href="#rfc.references">10.</a> References</h1>
+<a href="#rfc.references">11.</a> References</h1>
 <h1 id="rfc.references.1">
-<a href="#rfc.references.1">10.1.</a> Normative References</h1>
+<a href="#rfc.references.1">11.1.</a> Normative References</h1>
 <table><tbody>
 <tr>
 <td class="reference"><b id="RFC2119">[RFC2119]</b></td>
@@ -636,7 +662,7 @@ quoted-string = &lt;quoted-string, see [RFC7230], Section 3.2.6&gt;
 </tr>
 </tbody></table>
 <h1 id="rfc.references.2">
-<a href="#rfc.references.2">10.2.</a> Informative References</h1>
+<a href="#rfc.references.2">11.2.</a> Informative References</h1>
 <table><tbody>
 <tr>
 <td class="reference"><b id="RFC2743">[RFC2743]</b></td>

@@ -22,6 +22,8 @@
 <?rfc tocdepth="4"?>
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
+<?rfc comments="yes" ?>
+<?rfc inline="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
 <rfc category="std" docName="draft-williams-http-accept-auth-and-redirect-01" ipr="trust200902">
@@ -69,7 +71,7 @@
       <t>
         The Hyper-Text Transport Protocol (HTTP) offers several
         authentication schemes, but many sites use redirection-based
-        protocols to authenticate users. Some servers are faced with a
+        protocols to authenticate users.  Some servers are faced with a
         connundrum, having to choose between two mutually-exclusive
         options: redirect responses or 401 (authentication required)
         responses without knowing which the user-agent is most likely to
@@ -77,11 +79,20 @@
       </t>
 
       <t>
-        This document specifies a new HTTP request header, "Accept-Auth",
-        that user-agents may use to indicate their authentication
-        capabilities, including support (or not) for chasing redirects.
-        Also specified is a new HTTP authentication scheme named Redirect,
-        operating via 3xx or 401 responses at the server's choice.
+        This document specifies new HTTP request headers by which many
+        applications can improve interoperability even without changing
+        their HTTP implementations.  These new headers allow user-agents
+        to advertise authentication- and redirect-related capbilities
+        that servers can use to better make authentication and/or
+        redirect decisions.
+      </t>
+      <t>
+        Also specified is a new HTTP authentication scheme named
+        "Redirect" that enables communication between redirecting and
+        redirected authorities via preservation of "Authorization" and
+        "Authorization-Request" headers across redirections.  This
+        enables arbitrary authentication and authorization protocols to
+        work without requiring user-agent support for them.
       </t>
     </abstract>
 
@@ -92,7 +103,7 @@
 
       <t>
         The Hyper-Text Transport Protocol (HTTP) <xref
-      target="RFC7230">RFC7230</xref> provides several schemes for user
+          target="RFC7230">RFC7230</xref> provides several schemes for user
         authentication.  There also are popular ways of authenticating users
         based on redirection rather than standard HTTP authentication schemes.
         Heretofore, HTTP has provided no standard way for servers to know
@@ -105,13 +116,14 @@
       <t>
         This situation arises especially in corporate networks where
         JSON Web Tokens (JWT) <xref target="RFC7519"/> and Negotiate <xref
-        target="RFC4559"/> are both used, the latter usually with the
+          target="RFC4559"/> are both used, the latter usually with the
         Kerberos <xref target="RFC4120"/> GSS-API <xref target="RFC2743"/>
         mechanism <xref target="RFC4121"/>.
       </t>
 
       <t>
-        We address this problem by adding a new request header, "Accept-Auth:",
+        We address this problem by adding new request headers,
+        "Accept-Auth:", "Accept-Redirect-Auth:", and "Accept-Redirect:"
         by which a user-agent can indicate which HTTP authentication
         schemes, if any, it supports, including redirection.
       </t>
@@ -121,9 +133,28 @@
           The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
           "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
           document are to be interpreted as described in <xref
-        target="RFC2119">RFC 2119</xref>.
+            target="RFC2119">RFC 2119</xref>.
         </t>
       </section>
+    </section>
+
+    <section anchor="accept_redirect" title="Accept-Redirect and
+      Accept-Redirect-Auth">
+      <t>
+        The Accept-Redirect request header has two possible values:
+        "yes" and "no".  If "yes", this means the user-agent will follow
+        redirections, and the user-agent may or may not be willing to
+        authenticate at the redirected origin depending on local policy.
+      </t>
+
+      <t>
+        The Accept-Redirect-Auth request header exists to indicate which
+        authorities the user-agent is willing to redirect to and
+        authenticate at.  Its value is a whitespace-separate list of
+        domainnames.  If empty or has just the value ".", then the
+        service can conclude only that the user-agent has a whitelist,
+        but is not disclosing it.
+      </t>
     </section>
 
     <section anchor="accept_auth" title="Accept-Auth">
@@ -135,20 +166,11 @@
       </t>
 
       <t>
-        One special value, a single asterisk, indicates that the user-agent
-        is unwilling to list the authentication schemes it supports, but if
-        sent, the server MAY assume that the user-agent supports
-        redirection. Another special value, "None", indicates that the
-        user-agent has no credentials and does not support even
-        redirection.  User-agents SHOULD send no more than one special
-        value, and SHOULD NOT send other values if they send one of those
-        special values.
+        Accept-Auth values are similar to WWW-Authenticate values <xref
+          target="RFC7235"/>, but they do not have quite the same form, and they
+        are not challenges.  Using ABNF <xref target="RFC5234"/>:"
       </t>
 
-      <t>
-        Accept-Auth values are similar to WWW-Authenticate values <xref
-        target="RFC7235"/>, but they do not have quite the same form, and they
-        are not challenges.  Using ABNF <xref target="RFC5234"/>:"</t>
       <figure align="center" anchor="accept_auth_abnf">
         <preamble></preamble>
         <artwork align="left" type="abnf"><![CDATA[
@@ -157,11 +179,7 @@ Accept-Auth-values = Accept-Auth-value *( OWS ","
                                           OWS Accept-Auth-value )
 Accept-Auth-value = auth-scheme [1*SP
                                  ( auth-param *( "+" auth-param ) ]
-; The * auth-scheme indicates that the user-agent supports at least
-; the use of redirection, and may support other schemes but does not
-; wish to indicate which.  The None auth-scheme indicates that the
-; user-agent does not wish to authenticate in any way.
-auth-scheme = "*" / "None" / token
+auth-scheme = token
 auth-param = token BWS "=" BWS ( token / quoted-string )
 token          = 1*tchar
 tchar          = "!" / "'" / "*" / "-" / "." / "^"
@@ -180,94 +198,173 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
 
     <section anchor="redirect" title="The Redirect Authentication Scheme">
       <t>
-        Many sites use redirect-based protocols, with the final
-        redirection back to the origin effected via ECMAScript code in
-        order to be able to set an Authorization header.  Such
-        redirect-based protocols do not work for non-browser
+        Many sites use redirect-based protocols for authentication.
+        such protocols exchange cryptographic messages between
+        a relying party origin and an authenticator origin.  Some such
+        protocols use URI query parameters to carry cryptographic
+        messages.  Others depend on the browser HTML and ECMAScript
+        ecosystem, using a script to run HTTP requests from the
+        authenticator to the relying party with a token in Authorization
+        request header.  In the latter case, the server exchanges the
+        token for a cookie, and a script on the authenticator page then
+        effects a redirect by changing the window location.
+      </t>
+
+      <t>
+        Such redirect-based protocols do not work for non-browser
         user-agents.
       </t>
 
       <t>
-        Normally, user-agents do not copy response headers from redirect
+        User-agents normally do not copy response headers from redirect
         responses redirected requests.  One common non-browser
         user-agent, the <eref target="&InvokeWebRequest;">PowerShell
           command-line user-agent</eref>, has an option, <spanx
           style="verb">-PreserveAuthorizationOnRedirect</spanx> that
         causes it to copy Authorization headers from redirect responses
-        to redirected requests.  This enables redirect-based workflows
-        to work even though that user-agent is not a browser, lacks
-        interaction capabilities, HTML rendering, or JavaScript support.
+        to redirected requests.  This enables some redirect-based
+        workflows to work even though that user-agent is not a browser,
+        lacks interaction capabilities, HTML rendering, or JavaScript
+        support.
       </t>
 
       <t>
-        Here we define the "Redirect" HTTP authentication scheme, consisting
-        of these behaviors:
+        Here we define the "Redirect" HTTP authentication scheme.  This
+        scheme lets arbitrary authentication (and authorization)
+        protocols exchange cryptographic messages between the relying
+        party origin and the authenticator origin over headers rather
+        than URI parameters.  This is done by preserving a new header,
+        "Authorization-Request" across redirects, and the existing
+        "Authorization" header across redirects back to previous origins
+        in the redirect chain.
+      </t>
 
+      <t>
+        For our purposes, a "redirect response" is either a 3xx redirect
+        response with a Location header, or a 401 response with a
+        WWW-Authenticate header naming the Redirect authentication
+        scheme and a Location header.
+      </t>
+
+      <t>
         <list style="symbols">
           <t>
-            Servers needing to authenticate the user when the user-agent
-            has advertised support for the Redirect authentication scheme
-            SHOULD respond with a 401 with a "challenge" for the Redirect
-            authentication scheme, in which case servers MUST include a
-            Location header, and MAY include an Authorization header in the
-            response that the user-agent then MUST copy to the redirected
-            request if it chooses to follow the redirection.
-          </t>
+            User-agents that support the Redirect HTTP authentication
+            scheme MUST recognize a 401 Redirect challenge as a redirect
+            response.
 
-          <t>
-            User-agents MUST recognize a 401 Redirect challenge as a form of
-            redirection.
+            <list style="none">
+              <t><cref anchor="COMMENT_0" source="NW">
+                  QUESTION: What, if anything, should we say about the
+                  method used by the user-agent when chasing a redirection?
+              </cref></t>
+              <t><cref anchor="COMMENT_1" source="NW">
+                  One possibility is to let the redirecting origin specify
+                  the method and state some constraints (e.g., if the
+                  original method cannot have a request body, then the next
+                  method must be GET, else ???).
+              </cref></t>
+              <t><cref anchor="COMMENT_2" source="NW">
+                  Since the intent is to authenticate the user, a GET should
+                  always be good enough.  In particular, the authenticator
+                  origin may not need to see the original request body at
+                  all.
+              </cref></t>
+            </list>
           </t>
 
           <t>
             User-agents SHOULD also consider challenges for other
-            authentication schemes offered by the server.
+            authentication schemes offered by the server.  E.g., if the
+            server offers a Negotiate <xref target="RFC4559"/> challenge
+            and a Redirect challenge, the user-agent may choose either
+            (or neither) of the two.
+          </t>
+
+          <t>
+            User-agents that support the Redirect HTTP authentication
+            scheme MUST copy any Authorization-Request headers in redirect
+            responses to the redirected request.
+          </t>
+
+          <t>
+            User-agents that support the Redirect HTTP authentication
+            scheme MUST copy any Authorization headers in redirect
+            responses to the redirected request when the redirect is to
+            an origin seen earlier in the same redirect chain.
+          </t>
+
+          <t>
+            Servers needing to authenticate the user when the user-agent
+            has advertised support for the Redirect authentication scheme
+            SHOULD respond with a 401 with a "challenge" for the Redirect
+            authentication scheme and a Location header, and MAY include
+            an Authorization-Request header in the response that the
+            user-agent then MUST copy to the redirected request if it
+            chooses to follow the redirection.
+          </t>
+
+          <t>
+            Servers that have been redirected to MUST apply local policy
+            to decide:
+
+            <list style="symbols">
+              <t>whether to accept redirections from the redirecting origin;</t>
+
+              <t>
+                whether to further redirect the request (as usual) and
+                whether to set an Authorization-Request header in the
+                redirect response;
+              </t>
+
+              <t>whether to authenticate the user (as usual);</t>
+
+              <t>
+                whether to redirect back to the redirecting origin, and
+                whether to set an Authorization header in the redirect
+                response.
+              </t>
+            </list>
           </t>
 
           <t>
             User-agents may consult the user (if interactive), and/or a
             local policy (e.g., a white-list of acceptable origins for
             redirections), in order to decide whether to follow the
-            redirection.  Note that the redirected-to service should
-            always have enough information to decide whether to accept
-            or reject a redirection (e.g., via the Referer header), and
-            SHOULD have and apply local policy of its own.
+            redirection.
           </t>
 
           <t>
-            Because the intent of a Redirect challenge is to authenticate,
-            if the user-agent decides to follow the redirection, then the
-            user-agent SHOULD use switch to the GET method for the
-            redirected request, and upon being redirected back to the
-            original server, the user-agent MUST switch back to the
-            original method.
+            Note that the redirected-to service should always have
+            enough information to decide whether to accept or reject a
+            redirection (e.g., via the Referer header), and MUST have
+            and apply local policy of its own.
           </t>
         </list>
       </t>
 
       <t>
-        Note that nothing in this document alters Cross-Origin Resource
-        Sharing considerations regarding redirections.
+        Note that nothing in this document alters or obviates
+        Cross-Origin Resource Sharing policy and considerations.
       </t>
     </section>
 
     <section anchor="mixing" title="Mixing Redirection and Authentication Requests">
       <t>
-        In HTTP, servers can either respond with a 3xx redirect, or a 401, but
-        not both at once.  Besides the status codes, there is also response
-        header content that is relevant to effecting a redirect or requesting
-        authentication -- these two can be combined even if the status codes
-        cannot.  Existing user-agents wouldn't respond in the obvious way
-        because their response is generally keyed off of the server's response
-        status code.
+        Making use of the new Accept-Auth, Accept-Redirect, and
+        Accept-Redirect-Auth request headers will often require no
+        changes to existing HTTP user-agents and servers.  This is
+        because the application usually gets to set and inspect
+        arbitrary headers.  On the server side it may be difficult for
+        an application to add support for the Redirect authentication
+        scheme without modifying the HTTP server.  Therefore it may be
+        difficult for an application to issue a 401 Redirect, and it may
+        have to use a 3xx redirect instead.
       </t>
-      
+
       <t>
-        User-agents that conform to this specification MUST support the
-        Redirect authentication scheme as described in <xref
-        target="redirect"/>.  Additionally, user-agents conforming to this
-        specification MUST support the two cases described below as a
-        degenerate form of the Redirect authentication scheme.
+        Therefore, user-agents MUST treat 3xx and 401 Redirect responses
+        similarly, applying the same local policy in either case.
       </t>
 
       <section anchor="redirect_plus_auth" title="3xx Responses with WWW-Authenticate">
@@ -279,6 +376,12 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           a request to authenticate, at the user-agent's choice.  The HTTP
           method to use at the new Location SHALL be as specified for the
           status code used by the server.
+        </t>
+
+        <t>
+          Note that many user-agents will not understand that such
+          responses represent an option to authenticate with some
+          authentication scheme.
         </t>
       </section>
 
@@ -296,6 +399,11 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           of eventually being redirected back to the original URI authority,
           at which point the user-agent, if it chooses to retry the
           original request, SHOULD use the original method.
+        </t>
+
+        <t>
+          Note that many user-agents will not understand that such
+          responses represent an option to chase a redirection.
         </t>
       </section>
     </section>
@@ -347,24 +455,31 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         user-agent does include the Accept-Auth header in its request, then the
         server SHOULD select at least one scheme for a 401 response's
         WWW-Authenticate header that the user-agent also supports, but the
-        server MAY respond with a 3xx redirect response if the user-agent
-        advertised support for the Redirect scheme, or advertised the "*"
-        special scheme name.
+        server MAY respond with a 3xx redirect response if the
+        user-agent indicated support for redirects via the
+        Accept-Redirect header or by advertising support for the
+        Redirect HTTP authentication scheme.
       </t>
     </section>
 
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
-        Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew Brown, and
-        Geoffrey Thomas provided feedback and some review.
+        Ben Kaduk, Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew
+        Brown, and Geoffrey Thomas provided feedback and some review.
       </t>
     </section>
 
     <section title="IANA Considerations">
       <t>
-        IANA is directed to register the Accept-Auth header in the message
-        header registry, as well as the Redirect authentication
-        scheme in the HTTP Authentication Scheme registry.
+        IANA is requested to assign an expert to run the Expert Review
+        for the registration of the Accept-Auth, Accept-Redirect,
+        Accept-Redirect-Auth, and Authorization-Request headers in the
+        message header registry.
+      </t>
+      <t>
+        Upon completion of IETF Review, IANA is directed to add the
+        Redirect authentication scheme to the HTTP Authentication Scheme
+        registry.
       </t>
 
       <t>
@@ -387,24 +502,42 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
       </t>
 
       <t>
-        Also, the Authorization header preservation behavior allows
-        attackers to convey malformed tokens to victim servers, allowing
-        them to probe for parsing bugs.  However, this is essentially
-        already true for the URI itself.
+        Privacy-conscious user-agents MAY have local policy about which
+        authorities to use the new Accept-Auth, Accept-Redirect, and
+        Accept-Redirect-Auth headers.
       </t>
 
       <t>
-        One non-concern is that servers could cause user-agents to
-        engage in authentication schemes they shouldn't want to -- that
-        is a possibility regardless of whether the user-agent advertises
+        Also, the Authorization-Request and Authorization header
+        preservation behavior allows attackers to convey malformed
+        tokens to victim servers, allowing them to probe for parsing
+        bugs.  However, this is essentially already true for the URI
+        itself, therefore this is not a new issue.  Note that
+        Authorization headers are not to be preserved in all redirects,
+        just those that backtrack in the redirect chain.  That means
+        that there can be no confusion as to whether a given
+        Authorization header was added by the user-agent or a
+        redirecting origin: it will be either, but never both, and the
+        relying party origins don't care which it is.
+      </t>
+
+      <t>
+        One concern is that servers could cause user-agents to engage in
+        authentication schemes they shouldn't want to -- that is a
+        possibility regardless of whether the user-agent advertises
         support for an authentication scheme or not.  As usual, local
-        policy is relevant.
-      </t>
-
-      <t>
-        The special Accept-Auth value '*' can be used to reduce the
-        user-agent's fingerprint, at the cost of limiting the server's
-        knowledge of what authentication schemes the user-agent supports.
+        policy is relevant.  For example, the "curl" user-agent by
+        default will not chase redirections, and if enabled, it will by
+        default not authenticate at any redirected authority (this can
+        be further enabled).  User-agents SHOULD have local policy about
+        which redirections they will accept, whether to authenticate to
+        redirected authorities, and with what methods.  For example, a
+        user-agent may be willing to use the Negotiate authentication
+        scheme at some or any redirected authorities if it is happy to
+        let Kerberos implementations, including Key Distribution Centers
+        (KDCs), apply policy on the user-agent's behalf, but may not be
+        willing to perform Basic, Digest, or SCRAM authentication to any
+        redirected authorities not on a local whitelist.
       </t>
 
       <section anchor="multi_level_nego" title="Multi-Level Negotiation">
