@@ -9,6 +9,7 @@
   <!ENTITY RFC4121 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4121.xml">
   <!ENTITY RFC4559 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4559.xml">
   <!ENTITY RFC5234 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5234.xml">
+  <!ENTITY RFC6749 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml">
   <!ENTITY RFC7230 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
   <!ENTITY RFC7235 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml">
   <!ENTITY RFC7519 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml">
@@ -26,7 +27,7 @@
 <?rfc inline="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
-<rfc category="std" docName="draft-williams-http-accept-auth-and-redirect-01" ipr="trust200902">
+<rfc category="std" docName="draft-williams-http-accept-auth-and-redirect-02" ipr="trust200902">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
      you can add the attributes updates="NNNN" and obsoletes="NNNN" 
@@ -168,7 +169,7 @@
       <t>
         Accept-Auth values are similar to WWW-Authenticate values <xref
           target="RFC7235"/>, but they do not have quite the same form, and they
-        are not challenges.  Using ABNF <xref target="RFC5234"/>:"
+        are not challenges.  Using ABNF <xref target="RFC5234"/>:
       </t>
 
       <figure align="center" anchor="accept_auth_abnf">
@@ -199,7 +200,7 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
     <section anchor="redirect" title="The Redirect Authentication Scheme">
       <t>
         Many sites use redirect-based protocols for authentication.
-        such protocols exchange cryptographic messages between
+        Such protocols exchange cryptographic messages between
         a relying party origin and an authenticator origin.  Some such
         protocols use URI query parameters to carry cryptographic
         messages.  Others depend on the browser HTML and ECMAScript
@@ -213,6 +214,23 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
       <t>
         Such redirect-based protocols do not work for non-browser
         user-agents.
+      </t>
+
+      <t>
+        <cref anchor="COMMENT_CB0" source="NW">
+          It might be good to also specify request headers for
+          redirected requests that user-agents can use for passing
+          channel binding information to auth services.  E.g.,
+          Redirect-Channel-Binding: &lt;type&gt; &lt;cb-data&gt;.
+          This would allow Authorization tokens to be channel-bound.
+          Of course, there are difficulties here that would require
+          additional thinking.  For example, using unique CB would
+          require that the user-agent keep a connection open to the
+          redirecting origin.  While end-point CB would fail if multiple
+          servers serve the same origin using different server
+          certificates for the same names.  CB support could always be
+          added later.
+        </cref>
       </t>
 
       <t>
@@ -347,6 +365,93 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         Note that nothing in this document alters or obviates
         Cross-Origin Resource Sharing policy and considerations.
       </t>
+    </section>
+
+    <section anchor="applicability" title="Applicability">
+      <t>
+        Two different and only somewhat related features are specified
+        here.  One is intended to help interoperability in heterogeneous
+        environments with minimal or no changes to existing HTTP
+        implementations, just changes to applications.  The other is
+        intended to perfect existing redirect-based authentication and
+        authorization protocols.
+      </t>
+
+      <section anchor="accept_applicability" title="Applicability of Accept-* Headers">
+        <t>
+          The purpose of the Accept-Auth <xref target="accept_auth"/>,
+          Accept-Redirect <xref target="accept_redirect"/>, and
+          Accept-Redirect-Auth <xref target="accept_redirect"/> request
+          headers is to improve interoperability in heterogeneous
+          environments with minimal or no changes to HTTP
+          implementations.
+        </t>
+
+        <t>
+          For example, an application could set these request headers on
+          requests without changes to the user-agent.  That's because
+          setting arbitrary request headers is a common feature of HTTP
+          user-agent implementations.
+        </t>
+
+        <t>
+          It is also common for HTTP server implementations to allow
+          applications to inspect request headers produce 3xx redirect
+          or 401 responses.
+        </t>
+
+        <t>
+          Thus one can modify client applications to set these headers,
+          and server applications to check them and choose between 3xx
+          redirect and 401 authenticate options, as well as between
+          authentication schemes, based on the presence of those
+          headers.  All without changes to HTTP implementations.
+        </t>
+
+        <t>
+          HTTP implementors will probably want to add support for these
+          headers directly, but that isn't necessary in order to improve
+          interoperability.
+        </t>
+      </section>
+
+      <section anchor="redirect_applicability" title="Applicability of Redirect Auth Scheme">
+        <t>
+          The new HTTP auth scheme, Redirect <xref target="redirect"/>
+          also can be implemented without changes to HTTP
+          implementations, but will be much more useful if implemented
+          at least by user-agents.
+        </t>
+
+        <t>
+          In the short-term, the HTTP auth scheme, Redirect, is not
+          applicable to any existing protocols or applications.
+          However, existing authentication and authorization systems,
+          such as various Security Assertion Markup Language (SAML)
+          profiles, as well as OpenID Connect (OIDC) and OAuth 2.0 <xref
+            target="RFC6749"/> mechanisms in general, such as JWT <xref
+            target="RFC7519"/>, can be adapted to use Redirect.
+          <cref anchor="COMMENT_REFS_NEEDED0" source="NW">Need to add
+            references for SAML.  Bibxml does not have any entries for
+            OASIS specs!</cref>
+        </t>
+
+        <t>
+          Specifically, it is better to use headers for communication
+          between relying parties and auth services than it is to use
+          URI query parameters, as the latter imposes on application
+          designeds.  Besides this, the Redirect auth scheme can greatly
+          simplify adding support for, e.g., JWT, even for non-browser
+          applications.
+        </t>
+
+        <t>
+          Thus the Redirect HTTP auth scheme is more likely to be useful
+          in the future.  Note though that given user-agent support for
+          Redirect, it's fairly easy to adapt SAML/OIDC/JWT identity
+          providers to use it.
+        </t>
+      </section>
     </section>
 
     <section anchor="mixing" title="Mixing Redirection and Authentication Requests">
@@ -603,6 +708,7 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
       &RFC2743;
       &RFC4120;
       &RFC4121;
+      &RFC6749;
       &RFC7519;
     </references>
   </back>
