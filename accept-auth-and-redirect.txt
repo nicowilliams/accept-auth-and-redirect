@@ -82,7 +82,7 @@ Table of Contents
    2.  Accept-Redirect and       Accept-Redirect-Auth  . . . . . . .   3
    3.  Accept-Auth . . . . . . . . . . . . . . . . . . . . . . . . .   3
    4.  The Redirect Authentication Scheme  . . . . . . . . . . . . .   4
-   5.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   6
+   5.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   7
      5.1.  Applicability of Accept-* Headers . . . . . . . . . . . .   7
      5.2.  Applicability of Redirect Auth Scheme . . . . . . . . . .   7
    6.  Mixing Redirection and Authentication Requests  . . . . . . .   8
@@ -90,14 +90,14 @@ Table of Contents
      6.2.  401 Responses with Location . . . . . . . . . . . . . . .   8
    7.  Auth-params for Selected Authentication Mechanisms  . . . . .   9
    8.  Server-Side Selection of Authentication Schemes . . . . . . .   9
-   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   9
-   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  10
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
    11. Security Considerations . . . . . . . . . . . . . . . . . . .  10
      11.1.  Multi-Level Negotiation  . . . . . . . . . . . . . . . .  11
-   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  11
-     12.1.  Normative References . . . . . . . . . . . . . . . . . .  11
+   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
+     12.1.  Normative References . . . . . . . . . . . . . . . . . .  12
      12.2.  Informative References . . . . . . . . . . . . . . . . .  12
-     12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . .  12
+     12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . .  13
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  13
 
 1.  Introduction
@@ -216,7 +216,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    require that the user-agent keep a connection open to the redirecting
    origin.  While end-point CB would fail if multiple servers serve the
    same origin using different server certificates for the same names.
-   CB support could always be added later.  --NW]]
+   Binding to the dNSName and the issuer, however, would work, but that
 
 
 
@@ -225,6 +225,9 @@ Williams                 Expires October 3, 2020                [Page 4]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
+
+   would be a new CB type and would require registration in the IANA CB
+   type registry.  CB support could always be added later.  --NW]]
 
    User-agents normally do not copy response headers from redirect
    responses redirected requests.  One common non-browser user-agent,
@@ -270,9 +273,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
       offers a Negotiate [RFC4559] challenge and a Redirect challenge,
       the user-agent may choose either (or neither) of the two.
 
-   o  User-agents that support the Redirect HTTP authentication scheme
-      MUST copy any Authorization-Request headers in redirect responses
-      to the redirected request.
 
 
 
@@ -281,6 +281,10 @@ Williams                 Expires October 3, 2020                [Page 5]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
+
+   o  User-agents that support the Redirect HTTP authentication scheme
+      MUST copy any Authorization-Request headers in redirect responses
+      to the redirected request.
 
    o  User-agents that support the Redirect HTTP authentication scheme
       MUST copy any Authorization headers in redirect responses to the
@@ -322,6 +326,18 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    Note that nothing in this document alters or obviates Cross-Origin
    Resource Sharing policy and considerations.
 
+
+
+
+
+
+
+
+Williams                 Expires October 3, 2020                [Page 6]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
 5.  Applicability
 
    Two different and only somewhat related features are specified here.
@@ -330,13 +346,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    implementations, just changes to applications.  The other is intended
    to perfect existing redirect-based authentication and authorization
    protocols.
-
-
-
-Williams                 Expires October 3, 2020                [Page 6]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
 
 5.1.  Applicability of Accept-* Headers
 
@@ -376,15 +385,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    Assertion Markup Language (SAML) profiles, as well as OpenID Connect
    (OIDC) and OAuth 2.0 [RFC6749] mechanisms in general, such as JWT
    [RFC7519], can be adapted to use Redirect.  [[COMMENT_REFS_NEEDED0:
-   Need to add references for SAML.  Bibxml does not have any entries
-   for OASIS specs! --NW]]
-
-   Specifically, it is better to use headers for communication between
-   relying parties and auth services than it is to use URI query
-   parameters, as the latter imposes on application designeds.  Besides
-   this, the Redirect auth scheme can greatly simplify adding support
-   for, e.g., JWT, even for non-browser applications.
-
 
 
 
@@ -393,6 +393,15 @@ Williams                 Expires October 3, 2020                [Page 7]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
+
+   Need to add references for SAML.  Bibxml does not have any entries
+   for OASIS specs! --NW]]
+
+   Specifically, it is better to use headers for communication between
+   relying parties and auth services than it is to use URI query
+   parameters, as the latter imposes on application designeds.  Besides
+   this, the Redirect auth scheme can greatly simplify adding support
+   for, e.g., JWT, even for non-browser applications.
 
    Thus the Redirect HTTP auth scheme is more likely to be useful in the
    future.  Note though that given user-agent support for Redirect, it's
@@ -433,6 +442,14 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    via the server's authentication scheme offerings, or redirection.  In
    this case, a user-agent conforming to this specification SHALL
    consider the response to be either a redirect or a request to
+
+
+
+Williams                 Expires October 3, 2020                [Page 8]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
    authenticate, at the user-agent's choice, and SHOULD pick and execute
    one of those two options.  The user-agent SHOULD use the GET method
    at the new Location, with the expectation of eventually being
@@ -442,13 +459,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
    Note that many user-agents will not understand that such responses
    represent an option to chase a redirection.
-
-
-
-Williams                 Expires October 3, 2020                [Page 8]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
 
 7.  Auth-params for Selected Authentication Mechanisms
 
@@ -487,6 +497,15 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    or by advertising support for the Redirect HTTP authentication
    scheme.
 
+
+
+
+
+Williams                 Expires October 3, 2020                [Page 9]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
 9.  Acknowledgements
 
    Ben Kaduk, Simo Sorce, Viktor Dukhovni, Bill Bernsen, Andrew Brown,
@@ -498,13 +517,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    the registration of the Accept-Auth, Accept-Redirect, Accept-
    Redirect-Auth, and Authorization-Request headers in the message
    header registry.
-
-
-
-Williams                 Expires October 3, 2020                [Page 9]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
 
    Upon completion of IETF Review, IANA is directed to add the Redirect
    authentication scheme to the HTTP Authentication Scheme registry.
@@ -524,20 +536,34 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    as well as a privacy concern: that the Accept-Auth header may help
    fingerprint user-agents.
 
-   Privacy-conscious user-agents MAY have local policy about which
+   Privacy-conscious user-agents SHOULD have local policy about which
    authorities to use the new Accept-Auth, Accept-Redirect, and Accept-
    Redirect-Auth headers.
 
    Also, the Authorization-Request and Authorization header preservation
    behavior allows attackers to convey malformed tokens to victim
    servers, allowing them to probe for parsing bugs.  However, this is
-   essentially already true for the URI itself, therefore this is not a
-   new issue.  Note that Authorization headers are not to be preserved
-   in all redirects, just those that backtrack in the redirect chain.
-   That means that there can be no confusion as to whether a given
+   already true for the URI itself, therefore this is not a new issue.
+   Note that Authorization headers are not to be preserved in all
+   redirects, just those that backtrack in the redirect chain.  That
+   means that there can be no confusion as to whether a given
    Authorization header was added by the user-agent or a redirecting
    origin: it will be either, but never both, and the relying party
    origins don't care which it is.
+
+   Adding support for channel / token binding to the Redirect HTTP auth
+   scheme may well be possible and desirable.  This would consist of
+   request headers set by the user-agent on redirected requests that
+
+
+
+Williams                 Expires October 3, 2020               [Page 10]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
+   would carry channel binding (CB) data for one or more CB types
+   corresponding to the original origin (and/or previous hop).
 
    One concern is that servers could cause user-agents to engage in
    authentication schemes they shouldn't want to -- that is a
@@ -553,15 +579,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    redirected authorities if it is happy to let Kerberos
    implementations, including Key Distribution Centers (KDCs), apply
    policy on the user-agent's behalf, but may not be willing to perform
-
-
-
-
-Williams                 Expires October 3, 2020               [Page 10]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
    Basic, Digest, or SCRAM authentication to any redirected authorities
    not on a local whitelist.
 
@@ -591,6 +608,16 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    To avoid this failure more, user-agents SHOULD use auth-params to
    convey information that the server might need to make an appropriate.
 
+
+
+
+
+
+Williams                 Expires October 3, 2020               [Page 11]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
 12.  References
 
 12.1.  Normative References
@@ -610,13 +637,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
               Kerberos and NTLM HTTP Authentication in Microsoft
               Windows", RFC 4559, DOI 10.17487/RFC4559, June 2006,
               <https://www.rfc-editor.org/info/rfc4559>.
-
-
-
-Williams                 Expires October 3, 2020               [Page 11]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
 
    [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
               Specifications: ABNF", STD 68, RFC 5234,
@@ -645,6 +665,15 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
               DOI 10.17487/RFC4120, July 2005,
               <https://www.rfc-editor.org/info/rfc4120>.
 
+
+
+
+
+Williams                 Expires October 3, 2020               [Page 12]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
    [RFC4121]  Zhu, L., Jaganathan, K., and S. Hartman, "The Kerberos
               Version 5 Generic Security Service Application Program
               Interface (GSS-API) Mechanism: Version 2", RFC 4121,
@@ -665,15 +694,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
        us/powershell/module/microsoft.powershell.utility/invoke-
        webrequest?view=powershell-7
 
-
-
-
-
-Williams                 Expires October 3, 2020               [Page 12]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
 Author's Address
 
    Nico Williams (editor)
@@ -682,26 +702,6 @@ Author's Address
    USA
 
    Email: nico@cryptonector.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -189,7 +189,9 @@ Table of Contents
    require that the user-agent keep a connection open to the redirecting
    origin.  While end-point CB would fail if multiple servers serve the
    same origin using different server certificates for the same names.
-   CB support could always be added later.  --NW]]
+   Binding to the dNSName and the issuer, however, would work, but that
+   would be a new CB type and would require registration in the IANA CB
+   type registry.  CB support could always be added later.  --NW]]
 
    User-agents normally do not copy response headers from redirect
    responses redirected requests.  One common non-browser user-agent,
@@ -451,20 +453,26 @@ Table of Contents
    as well as a privacy concern: that the Accept-Auth header may help
    fingerprint user-agents.
 
-   Privacy-conscious user-agents MAY have local policy about which
+   Privacy-conscious user-agents SHOULD have local policy about which
    authorities to use the new Accept-Auth, Accept-Redirect, and Accept-
    Redirect-Auth headers.
 
    Also, the Authorization-Request and Authorization header preservation
    behavior allows attackers to convey malformed tokens to victim
    servers, allowing them to probe for parsing bugs.  However, this is
-   essentially already true for the URI itself, therefore this is not a
-   new issue.  Note that Authorization headers are not to be preserved
-   in all redirects, just those that backtrack in the redirect chain.
-   That means that there can be no confusion as to whether a given
+   already true for the URI itself, therefore this is not a new issue.
+   Note that Authorization headers are not to be preserved in all
+   redirects, just those that backtrack in the redirect chain.  That
+   means that there can be no confusion as to whether a given
    Authorization header was added by the user-agent or a redirecting
    origin: it will be either, but never both, and the relying party
    origins don't care which it is.
+
+   Adding support for channel / token binding to the Redirect HTTP auth
+   scheme may well be possible and desirable.  This would consist of
+   request headers set by the user-agent on redirected requests that
+   would carry channel binding (CB) data for one or more CB types
+   corresponding to the original origin (and/or previous hop).
 
    One concern is that servers could cause user-agents to engage in
    authentication schemes they shouldn't want to -- that is a
