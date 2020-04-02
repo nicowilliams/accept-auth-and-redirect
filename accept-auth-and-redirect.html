@@ -440,7 +440,7 @@
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users.  Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  </p>
 <p>This document specifies new HTTP request headers by which many applications can improve interoperability even without changing their HTTP implementations.  These new headers allow user-agents to advertise authentication- and redirect-related capbilities that servers can use to better make authentication and/or redirect decisions.  </p>
-<p>Also specified is a new HTTP authentication scheme named "Redirect" that enables communication between redirecting and redirected authorities via preservation of "Authorization" and "Authorization-Request" headers across redirections.  This enables arbitrary authentication and authorization protocols to work without requiring user-agent support for them.  </p>
+<p>Also specified is a new HTTP authentication scheme named "Redirect" that enables communication between redirecting and redirected authorities via preservation of "Authorization" and "Authorization-Request" headers across redirections.  This enables arbitrary authentication and authorization protocols to work without requiring user-agent support for them and without having to (ab)use URI query parameters.  </p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
@@ -559,7 +559,7 @@ quoted-string = &lt;quoted-string, see [RFC7230], Section 3.2.6&gt;
 <li>User-agents that support the Redirect HTTP authentication scheme MUST recognize a 401 Redirect challenge as a redirect response.  <ul class="empty">
 <li><a id="COMMENT_0" class="info">[COMMENT_0]<span class="info">NW: QUESTION: What, if anything, should we say about the method used by the user-agent when chasing a redirection? </span></a></li>
 <li><a id="COMMENT_1" class="info">[COMMENT_1]<span class="info">NW: One possibility is to let the redirecting origin specify the method and state some constraints (e.g., if the original method cannot have a request body, then the next method must be GET, else ???).  </span></a></li>
-<li><a id="COMMENT_2" class="info">[COMMENT_2]<span class="info">NW: Since the intent is to authenticate the user, a GET should always be good enough.  In particular, the authenticator origin may not need to see the original request body at all.  </span></a></li>
+<li><a id="COMMENT_2" class="info">[COMMENT_2]<span class="info">NW: Since the intent is to authenticate the user, a GET should always be good enough.  In particular, the authenticator origin may not need to see the original request body at all, though it may need to know the original method, and it can get that from the relying party (e.g., via the Redirect header preservation mechanism).  </span></a></li>
 </ul>
 <p> </p>
 </li>

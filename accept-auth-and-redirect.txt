@@ -33,7 +33,8 @@ Abstract
    authorities via preservation of "Authorization" and "Authorization-
    Request" headers across redirections.  This enables arbitrary
    authentication and authorization protocols to work without requiring
-   user-agent support for them.
+   user-agent support for them and without having to (ab)use URI query
+   parameters.
 
 Status of This Memo
 
@@ -49,7 +50,6 @@ Status of This Memo
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
-
 
 
 
@@ -78,26 +78,26 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
+   1.1.  Requirements Language . . . . . . . . . . . . . . . . . . .   3
    2.  Accept-Redirect and       Accept-Redirect-Auth  . . . . . . .   3
    3.  Accept-Auth . . . . . . . . . . . . . . . . . . . . . . . . .   3
    4.  The Redirect Authentication Scheme  . . . . . . . . . . . . .   4
    5.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   7
-     5.1.  Applicability of Accept-* Headers . . . . . . . . . . . .   7
-     5.2.  Applicability of Redirect Auth Scheme . . . . . . . . . .   7
+   5.1.  Applicability of Accept-* Headers . . . . . . . . . . . . .   7
+   5.2.  Applicability of Redirect Auth Scheme . . . . . . . . . . .   7
    6.  Mixing Redirection and Authentication Requests  . . . . . . .   8
-     6.1.  3xx Responses with WWW-Authenticate . . . . . . . . . . .   8
-     6.2.  401 Responses with Location . . . . . . . . . . . . . . .   8
+   6.1.  3xx Responses with WWW-Authenticate . . . . . . . . . . . .   8
+   6.2.  401 Responses with Location . . . . . . . . . . . . . . . .   8
    7.  Auth-params for Selected Authentication Mechanisms  . . . . .   9
    8.  Server-Side Selection of Authentication Schemes . . . . . . .   9
    9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  10
    10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
    11. Security Considerations . . . . . . . . . . . . . . . . . . .  10
-     11.1.  Multi-Level Negotiation  . . . . . . . . . . . . . . . .  11
+   11.1.  Multi-Level Negotiation  . . . . . . . . . . . . . . . . .  11
    12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
-     12.1.  Normative References . . . . . . . . . . . . . . . . . .  12
-     12.2.  Informative References . . . . . . . . . . . . . . . . .  12
-     12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . .  13
+   12.1.  Normative References . . . . . . . . . . . . . . . . . . .  12
+   12.2.  Informative References . . . . . . . . . . . . . . . . . .  12
+   12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . . .  13
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  13
 
 1.  Introduction
@@ -266,14 +266,14 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
          [[COMMENT_2: Since the intent is to authenticate the user, a
          GET should always be good enough.  In particular, the
          authenticator origin may not need to see the original request
-         body at all.  --NW]]
+         body at all, though it may need to know the original method,
+         and it can get that from the relying party (e.g., via the
+         Redirect header preservation mechanism).  --NW]]
 
    o  User-agents SHOULD also consider challenges for other
       authentication schemes offered by the server.  E.g., if the server
       offers a Negotiate [RFC4559] challenge and a Redirect challenge,
       the user-agent may choose either (or neither) of the two.
-
-
 
 
 

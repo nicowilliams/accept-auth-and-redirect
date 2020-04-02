@@ -20,6 +20,7 @@
 <!-- used by XSLT processors -->
 <?rfc strict="yes" ?>
 <?rfc toc="yes"?>
+<?rfc tocindent="no"?>
 <?rfc tocdepth="4"?>
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
@@ -93,7 +94,8 @@
         redirected authorities via preservation of "Authorization" and
         "Authorization-Request" headers across redirections.  This
         enables arbitrary authentication and authorization protocols to
-        work without requiring user-agent support for them.
+        work without requiring user-agent support for them and without
+        having to (ab)use URI query parameters.
       </t>
     </abstract>
 
@@ -276,19 +278,23 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
             <list style="none">
               <t><cref anchor="COMMENT_0" source="NW">
                   QUESTION: What, if anything, should we say about the
-                  method used by the user-agent when chasing a redirection?
+                  method used by the user-agent when chasing a
+                  redirection?
               </cref></t>
               <t><cref anchor="COMMENT_1" source="NW">
-                  One possibility is to let the redirecting origin specify
-                  the method and state some constraints (e.g., if the
-                  original method cannot have a request body, then the next
-                  method must be GET, else ???).
+                  One possibility is to let the redirecting origin
+                  specify the method and state some constraints (e.g.,
+                  if the original method cannot have a request body,
+                  then the next method must be GET, else ???).
               </cref></t>
               <t><cref anchor="COMMENT_2" source="NW">
-                  Since the intent is to authenticate the user, a GET should
-                  always be good enough.  In particular, the authenticator
-                  origin may not need to see the original request body at
-                  all.
+                  Since the intent is to authenticate the user, a GET
+                  should always be good enough.  In particular, the
+                  authenticator origin may not need to see the original
+                  request body at all, though it may need to know the
+                  original method, and it can get that from the relying
+                  party (e.g., via the Redirect header preservation
+                  mechanism).
               </cref></t>
             </list>
           </t>
