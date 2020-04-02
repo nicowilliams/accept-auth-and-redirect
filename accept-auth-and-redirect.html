@@ -379,6 +379,7 @@
 <link href="#rfc.section.2" rel="Chapter" title="2 Accept-Redirect and       Accept-Redirect-Auth">
 <link href="#rfc.section.3" rel="Chapter" title="3 Accept-Auth">
 <link href="#rfc.section.4" rel="Chapter" title="4 The Redirect Authentication Scheme">
+<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Redirect Examples">
 <link href="#rfc.section.5" rel="Chapter" title="5 Applicability">
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Applicability of Accept-* Headers">
 <link href="#rfc.section.5.2" rel="Chapter" title="5.2 Applicability of Redirect Auth Scheme">
@@ -402,7 +403,7 @@
 
   <meta name="dct.creator" content="Williams, N., Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:draft-williams-http-accept-auth-and-redirect-02" />
-  <meta name="dct.issued" scheme="ISO8601" content="2020-01" />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-02" />
   <meta name="dct.abstract" content="The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users.  Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  " />
   <meta name="description" content="The Hyper-Text Transport Protocol (HTTP) offers several authentication schemes, but many sites use redirection-based protocols to authenticate users.  Some servers are faced with a connundrum, having to choose between two mutually-exclusive options: redirect responses or 401 (authentication required) responses without knowing which the user-agent is most likely to support.  " />
 
@@ -423,10 +424,10 @@
 </tr>
 <tr>
 <td class="left">Intended status: Standards Track</td>
-<td class="right">April 1, 2020</td>
+<td class="right">April 2, 2020</td>
 </tr>
 <tr>
-<td class="left">Expires: October 3, 2020</td>
+<td class="left">Expires: October 4, 2020</td>
 <td class="right"></td>
 </tr>
 
@@ -445,7 +446,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on October 3, 2020.</p>
+<p>This Internet-Draft will expire on October 4, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -465,7 +466,9 @@
 </li>
 <li>4.   <a href="#rfc.section.4">The Redirect Authentication Scheme</a>
 </li>
-<li>5.   <a href="#rfc.section.5">Applicability</a>
+<ul><li>4.1.   <a href="#rfc.section.4.1">Redirect Examples</a>
+</li>
+</ul><li>5.   <a href="#rfc.section.5">Applicability</a>
 </li>
 <ul><li>5.1.   <a href="#rfc.section.5.1">Applicability of Accept-* Headers</a>
 </li>
@@ -581,6 +584,22 @@ quoted-string = &lt;quoted-string, see [RFC7230], Section 3.2.6&gt;
 
 <p> </p>
 <p id="rfc.section.4.p.8">Note that nothing in this document alters or obviates Cross-Origin Resource Sharing policy and considerations.  </p>
+<h1 id="rfc.section.4.1">
+<a href="#rfc.section.4.1">4.1.</a> <a href="#redirect_examples" id="redirect_examples">Redirect Examples</a>
+</h1>
+<p id="rfc.section.4.1.p.1">Consider a URL https://janedoe.catvidhub.com.example/v0.mpg which redirects to https://janedoe.catvidhub.io.example/v0.mpg, and suppose the latter also wants to authenticate users via redirection to an authenticator at https://auth.catvidhub.nu.example/.  Let us label these A, B, and C respectively.  </p>
+<p id="rfc.section.4.1.p.2">In this example we should see a normal redirect from A to B, and at B we should see a redirect to C, and then finally a redirect back from C to B, and then B should serve the desired resource ("/v0.mpg") if C provided the user-agent with a suitable token.  Using the Redirect auth scheme we should see: </p>
+
+<ul>
+<li>Server A would respond with a normal 3xx redirect to B, not a 401 authenticate-with-Redirect, and no Authorization or Authorization-Request headers in the redirect response.  </li>
+<li>Server B would respond with a 401 authenticate-with-Redirect response, no Authorization headers in its response, and (probably) a Authorization-Request header in the response by which it might send a signed request for authorization to the "/v0.mpg" resource.  </li>
+<li>Server C would check cookies and possibly respond with a 401 for the user-agent to authenticate using some other scheme.  </li>
+<li>Once the user is authenticated, server C would check the user's authorization to access the resource ("/v0.mpg"), and if permitted, would respond with a 3xx response with an Authorization header bearing a cryptographic token for B attesting to the user's authorization.  </li>
+<li>Since server C's redirection doubles back to a server (B) seen earlier in the redirect chain, the user-agent would preserve the Authorization header from the response, which means server B would see it, verify its integrity, decode it, and then serve the resource.  </li>
+</ul>
+
+<p> </p>
+<p><a id="CREF5" class="info">[CREF5]<span class="info">NW: Ah, but if server C wants to respond with HTML and ECMAScript for a browser to evaluate as an aid to authentication, what status code shall it use for that?  If a 2xx, then the redirect chain will be broken, and the Authorization header in the final redirect will not be preserved!  We could relax the rules for when to preserve the Authorization header.  Or we could not reuse the Authorization header for this, instead introducing Authorization-Response, say, with Authorization-{Request, Response} always preserved on redirects.  </span></a></p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#applicability" id="applicability">Applicability</a>
 </h1>

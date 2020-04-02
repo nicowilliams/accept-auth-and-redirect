@@ -4,8 +4,8 @@
 
 Internet Engineering Task Force                         N. Williams, Ed.
 Internet-Draft                                         Cryptonector, LLC
-Intended status: Standards Track                           April 1, 2020
-Expires: October 3, 2020
+Intended status: Standards Track                           April 2, 2020
+Expires: October 4, 2020
 
 
      Accept-Auth HTTP Header for 3xx/401 Negotiation, and Redirect
@@ -53,12 +53,12 @@ Status of This Memo
 
 
 
-Williams                 Expires October 3, 2020                [Page 1]
+Williams                 Expires October 4, 2020                [Page 1]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
-   This Internet-Draft will expire on October 3, 2020.
+   This Internet-Draft will expire on October 4, 2020.
 
 Copyright Notice
 
@@ -82,38 +82,39 @@ Table of Contents
    2.  Accept-Redirect and       Accept-Redirect-Auth  . . . . . . .   3
    3.  Accept-Auth . . . . . . . . . . . . . . . . . . . . . . . . .   3
    4.  The Redirect Authentication Scheme  . . . . . . . . . . . . .   4
-   5.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   7
-   5.1.  Applicability of Accept-* Headers . . . . . . . . . . . . .   7
-   5.2.  Applicability of Redirect Auth Scheme . . . . . . . . . . .   7
-   6.  Mixing Redirection and Authentication Requests  . . . . . . .   8
-   6.1.  3xx Responses with WWW-Authenticate . . . . . . . . . . . .   8
-   6.2.  401 Responses with Location . . . . . . . . . . . . . . . .   8
-   7.  Auth-params for Selected Authentication Mechanisms  . . . . .   9
-   8.  Server-Side Selection of Authentication Schemes . . . . . . .   9
-   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  10
-   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
-   11. Security Considerations . . . . . . . . . . . . . . . . . . .  10
-   11.1.  Multi-Level Negotiation  . . . . . . . . . . . . . . . . .  11
-   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
-   12.1.  Normative References . . . . . . . . . . . . . . . . . . .  12
-   12.2.  Informative References . . . . . . . . . . . . . . . . . .  12
-   12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . . .  13
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  13
+   4.1.  Redirect Examples . . . . . . . . . . . . . . . . . . . . .   7
+   5.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   8
+   5.1.  Applicability of Accept-* Headers . . . . . . . . . . . . .   8
+   5.2.  Applicability of Redirect Auth Scheme . . . . . . . . . . .   8
+   6.  Mixing Redirection and Authentication Requests  . . . . . . .   9
+   6.1.  3xx Responses with WWW-Authenticate . . . . . . . . . . . .   9
+   6.2.  401 Responses with Location . . . . . . . . . . . . . . . .   9
+   7.  Auth-params for Selected Authentication Mechanisms  . . . . .  10
+   8.  Server-Side Selection of Authentication Schemes . . . . . . .  10
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  11
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+   11. Security Considerations . . . . . . . . . . . . . . . . . . .  11
+   11.1.  Multi-Level Negotiation  . . . . . . . . . . . . . . . . .  12
+   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+   12.1.  Normative References . . . . . . . . . . . . . . . . . . .  13
+   12.2.  Informative References . . . . . . . . . . . . . . . . . .  13
+   12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . . .  14
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  14
 
 1.  Introduction
 
    The Hyper-Text Transport Protocol (HTTP) RFC7230 [RFC7230] provides
    several schemes for user authentication.  There also are popular ways
    of authenticating users based on redirection rather than standard
-   HTTP authentication schemes.  Heretofore, HTTP has provided no
 
 
 
-Williams                 Expires October 3, 2020                [Page 2]
+Williams                 Expires October 4, 2020                [Page 2]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
+   HTTP authentication schemes.  Heretofore, HTTP has provided no
    standard way for servers to know which authentication schemes,
    including redirect-based methods, a given user-agent supports, but
    servers must choose between either redirection or HTTP
@@ -164,8 +165,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-
-Williams                 Expires October 3, 2020                [Page 3]
+Williams                 Expires October 4, 2020                [Page 3]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -221,7 +221,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020                [Page 4]
+Williams                 Expires October 4, 2020                [Page 4]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -277,7 +277,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020                [Page 5]
+Williams                 Expires October 4, 2020                [Page 5]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -333,7 +333,63 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020                [Page 6]
+Williams                 Expires October 4, 2020                [Page 6]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
+4.1.  Redirect Examples
+
+   Consider a URL https://janedoe.catvidhub.com.example/v0.mpg which
+   redirects to https://janedoe.catvidhub.io.example/v0.mpg, and suppose
+   the latter also wants to authenticate users via redirection to an
+   authenticator at https://auth.catvidhub.nu.example/.  Let us label
+   these A, B, and C respectively.
+
+   In this example we should see a normal redirect from A to B, and at B
+   we should see a redirect to C, and then finally a redirect back from
+   C to B, and then B should serve the desired resource ("/v0.mpg") if C
+   provided the user-agent with a suitable token.  Using the Redirect
+   auth scheme we should see:
+
+   o  Server A would respond with a normal 3xx redirect to B, not a 401
+      authenticate-with-Redirect, and no Authorization or Authorization-
+      Request headers in the redirect response.
+
+   o  Server B would respond with a 401 authenticate-with-Redirect
+      response, no Authorization headers in its response, and (probably)
+      a Authorization-Request header in the response by which it might
+      send a signed request for authorization to the "/v0.mpg" resource.
+
+   o  Server C would check cookies and possibly respond with a 401 for
+      the user-agent to authenticate using some other scheme.
+
+   o  Once the user is authenticated, server C would check the user's
+      authorization to access the resource ("/v0.mpg"), and if
+      permitted, would respond with a 3xx response with an Authorization
+      header bearing a cryptographic token for B attesting to the user's
+      authorization.
+
+   o  Since server C's redirection doubles back to a server (B) seen
+      earlier in the redirect chain, the user-agent would preserve the
+      Authorization header from the response, which means server B would
+      see it, verify its integrity, decode it, and then serve the
+      resource.
+
+   [[CREF5: Ah, but if server C wants to respond with HTML and
+   ECMAScript for a browser to evaluate as an aid to authentication,
+   what status code shall it use for that?  If a 2xx, then the redirect
+   chain will be broken, and the Authorization header in the final
+   redirect will not be preserved!  We could relax the rules for when to
+   preserve the Authorization header.  Or we could not reuse the
+   Authorization header for this, instead introducing Authorization-
+   Response, say, with Authorization-{Request, Response} always
+   preserved on redirects.  --NW]]
+
+
+
+
+Williams                 Expires October 4, 2020                [Page 7]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -389,7 +445,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020                [Page 7]
+Williams                 Expires October 4, 2020                [Page 8]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -445,7 +501,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020                [Page 8]
+Williams                 Expires October 4, 2020                [Page 9]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -501,7 +557,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020                [Page 9]
+Williams                 Expires October 4, 2020               [Page 10]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -557,7 +613,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020               [Page 10]
+Williams                 Expires October 4, 2020               [Page 11]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -613,7 +669,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020               [Page 11]
+Williams                 Expires October 4, 2020               [Page 12]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -669,7 +725,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
 
-Williams                 Expires October 3, 2020               [Page 12]
+Williams                 Expires October 4, 2020               [Page 13]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
@@ -725,4 +781,4 @@ Author's Address
 
 
 
-Williams                 Expires October 3, 2020               [Page 13]
+Williams                 Expires October 4, 2020               [Page 14]
