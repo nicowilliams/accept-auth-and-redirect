@@ -4,8 +4,8 @@
 
 Internet Engineering Task Force                         N. Williams, Ed.
 Internet-Draft                                         Cryptonector, LLC
-Intended status: Standards Track                           April 2, 2020
-Expires: October 4, 2020
+Intended status: Standards Track                           April 8, 2020
+Expires: October 10, 2020
 
 
      Accept-Auth HTTP Header for 3xx/401 Negotiation, and Redirect
@@ -30,11 +30,10 @@ Abstract
 
    Also specified is a new HTTP authentication scheme named "Redirect"
    that enables communication between redirecting and redirected
-   authorities via preservation of "Authorization" and "Authorization-
-   Request" headers across redirections.  This enables arbitrary
-   authentication and authorization protocols to work without requiring
-   user-agent support for them and without having to (ab)use URI query
-   parameters.
+   authorities via preservation of "Authorization" headers across
+   redirections.  This enables arbitrary authentication and
+   authorization protocols to work without requiring user-agent support
+   for them and without having to (ab)use URI query parameters.
 
 Status of This Memo
 
@@ -53,12 +52,13 @@ Status of This Memo
 
 
 
-Williams                 Expires October 4, 2020                [Page 1]
+
+Williams                Expires October 10, 2020                [Page 1]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
-   This Internet-Draft will expire on October 4, 2020.
+   This Internet-Draft will expire on October 10, 2020.
 
 Copyright Notice
 
@@ -77,7 +77,7 @@ Copyright Notice
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
    1.1.  Requirements Language . . . . . . . . . . . . . . . . . . .   3
    2.  Accept-Redirect and       Accept-Redirect-Auth  . . . . . . .   3
    3.  Accept-Auth . . . . . . . . . . . . . . . . . . . . . . . . .   3
@@ -88,32 +88,37 @@ Table of Contents
    5.2.  Applicability of Redirect Auth Scheme . . . . . . . . . . .   8
    6.  Mixing Redirection and Authentication Requests  . . . . . . .   9
    6.1.  3xx Responses with WWW-Authenticate . . . . . . . . . . . .   9
-   6.2.  401 Responses with Location . . . . . . . . . . . . . . . .   9
+   6.2.  401 Responses with Location . . . . . . . . . . . . . . . .  10
    7.  Auth-params for Selected Authentication Mechanisms  . . . . .  10
    8.  Server-Side Selection of Authentication Schemes . . . . . . .  10
    9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  11
    10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
    11. Security Considerations . . . . . . . . . . . . . . . . . . .  11
-   11.1.  Multi-Level Negotiation  . . . . . . . . . . . . . . . . .  12
+   11.1.  Security Considerations for the Redirect Auth Scheme . . .  11
+   11.2.  Multi-Level Negotiation  . . . . . . . . . . . . . . . . .  12
    12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
    12.1.  Normative References . . . . . . . . . . . . . . . . . . .  13
-   12.2.  Informative References . . . . . . . . . . . . . . . . . .  13
+   12.2.  Informative References . . . . . . . . . . . . . . . . . .  14
    12.3.  URIs . . . . . . . . . . . . . . . . . . . . . . . . . . .  14
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  14
+
+
+
+
+
+
+
+
+Williams                Expires October 10, 2020                [Page 2]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
 
 1.  Introduction
 
    The Hyper-Text Transport Protocol (HTTP) RFC7230 [RFC7230] provides
    several schemes for user authentication.  There also are popular ways
    of authenticating users based on redirection rather than standard
-
-
-
-Williams                 Expires October 4, 2020                [Page 2]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
    HTTP authentication schemes.  Heretofore, HTTP has provided no
    standard way for servers to know which authentication schemes,
    including redirect-based methods, a given user-agent supports, but
@@ -156,19 +161,18 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    one authentication schemes, and optionally may indicate schemes-
    specific metadata.
 
-   Accept-Auth values are similar to WWW-Authenticate values [RFC7235],
-   but they do not have quite the same form, and they are not
-   challenges.  Using ABNF [RFC5234]:
 
 
 
 
-
-
-Williams                 Expires October 4, 2020                [Page 3]
+Williams                Expires October 10, 2020                [Page 3]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
+
+   Accept-Auth values are similar to WWW-Authenticate values [RFC7235],
+   but they do not have quite the same form, and they are not
+   challenges.  Using ABNF [RFC5234]:
 
    ; Can we use the RFC7230 #rule ABNF extension here?
    Accept-Auth-values = Accept-Auth-value *( OWS ","
@@ -209,25 +213,32 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
    [[COMMENT_CB0: It might be good to also specify request headers for
    redirected requests that user-agents can use for passing channel
-   binding information to auth services.  E.g., Redirect-Channel-
+   binding information to auth services.  E.g., Authorization-Channel-
    Binding: <type> <cb-data>.  This would allow Authorization tokens to
    be channel-bound.  Of course, there are difficulties here that would
    require additional thinking.  For example, using unique CB would
    require that the user-agent keep a connection open to the redirecting
-   origin.  While end-point CB would fail if multiple servers serve the
-   same origin using different server certificates for the same names.
-   Binding to the dNSName and the issuer, however, would work, but that
 
 
 
-
-Williams                 Expires October 4, 2020                [Page 4]
+Williams                Expires October 10, 2020                [Page 4]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
+   origin.  While end-point CB would fail if multiple servers serve the
+   same origin using different server certificates for the same names.
+   Binding to the dNSName and the issuer, however, would work, but that
    would be a new CB type and would require registration in the IANA CB
    type registry.  CB support could always be added later.  --NW]]
+   [[COMMENT_CB1: Possible new CB types include: dNSName+hash(issuer-
+   cert/SPKI), some sort of TLS session ID possibly constructed using
+   the TLS key material exporter but derived in such a way that it
+   identifies a set of connections resumed from the same original
+   handshake.  The latter would be prone to failure on resumption if the
+   resumption ticket is rejected for any reason, but otherwise would
+   work really well for tokbind-style token protocols, especially for
+   user-agents that can retry.  --NW]]
 
    User-agents normally do not copy response headers from redirect
    responses redirected requests.  One common non-browser user-agent,
@@ -242,9 +253,8 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    scheme lets arbitrary authentication (and authorization) protocols
    exchange cryptographic messages between the relying party origin and
    the authenticator origin over headers rather than URI parameters.
-   This is done by preserving a new header, "Authorization-Request"
-   across redirects, and the existing "Authorization" header across
-   redirects back to previous origins in the redirect chain.
+   This is done by copying ("preserving") any "Authorization" headers in
+   a redirect response to the redirected request.
 
    For our purposes, a "redirect response" is either a 3xx redirect
    response with a Location header, or a 401 response with a WWW-
@@ -263,6 +273,15 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
          original method cannot have a request body, then the next
          method must be GET, else ???).  --NW]]
 
+
+
+
+
+Williams                Expires October 10, 2020                [Page 5]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
          [[COMMENT_2: Since the intent is to authenticate the user, a
          GET should always be good enough.  In particular, the
          authenticator origin may not need to see the original request
@@ -275,38 +294,28 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
       offers a Negotiate [RFC4559] challenge and a Redirect challenge,
       the user-agent may choose either (or neither) of the two.
 
-
-
-Williams                 Expires October 4, 2020                [Page 5]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
-   o  User-agents that support the Redirect HTTP authentication scheme
-      MUST copy any Authorization-Request headers in redirect responses
-      to the redirected request.
-
-   o  User-agents that support the Redirect HTTP authentication scheme
-      MUST copy any Authorization headers in redirect responses to the
-      redirected request when the redirect is to an origin seen earlier
-      in the same redirect chain.
+   o  Unless rejected by local policy (or the user), user-agents that
+      support the Redirect HTTP authentication scheme MUST copy any
+      Authorization headers in redirect responses to the redirected
+      request.
 
    o  Servers needing to authenticate the user when the user-agent has
       advertised support for the Redirect authentication scheme SHOULD
       respond with a 401 with a "challenge" for the Redirect
       authentication scheme and a Location header, and MAY include an
-      Authorization-Request header in the response that the user-agent
-      then MUST copy to the redirected request if it chooses to follow
-      the redirection.
+      Authorization header in the response that the user-agent then MUST
+      copy to the redirected request if it chooses to follow the
+      redirection.  Servers MAY use a 3xx response instead.
 
    o  Servers that have been redirected to MUST apply local policy to
       decide:
 
-      *  whether to accept redirections from the redirecting origin;
+      *  whether to accept redirections from the redirecting origin
+         (identified by the Referer header or by a cryptographic token
+         in the preserved Authorization header);
 
       *  whether to further redirect the request (as usual) and whether
-         to set an Authorization-Request header in the redirect
-         response;
+         to set an Authorization header in the redirect response;
 
       *  whether to authenticate the user (as usual);
 
@@ -320,31 +329,33 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
    o  Note that the redirected-to service should always have enough
       information to decide whether to accept or reject a redirection
+
+
+
+
+Williams                Expires October 10, 2020                [Page 6]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
       (e.g., via the Referer header), and MUST have and apply local
       policy of its own.
 
    Note that nothing in this document alters or obviates Cross-Origin
    Resource Sharing policy and considerations.
 
-
-
-
-
-
-
-
-Williams                 Expires October 4, 2020                [Page 6]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
 4.1.  Redirect Examples
 
    Consider a URL https://janedoe.catvidhub.com.example/v0.mpg which
-   redirects to https://janedoe.catvidhub.io.example/v0.mpg, and suppose
-   the latter also wants to authenticate users via redirection to an
-   authenticator at https://auth.catvidhub.nu.example/.  Let us label
-   these A, B, and C respectively.
+   permanently redirects to https://janedoe.catvidhub.io.example/v0.mpg,
+   and suppose the latter also wants to authenticate users via
+   redirection to an authenticator at
+   https://auth.catvidhub.nu.example/.  Let us label these A, B, and C
+   respectively.
+
+   The first redirection in this example is not involved in
+   authentication, and is included only to show that a redirection chain
+   where only parts of it are involved in authentication is possible.
 
    In this example we should see a normal redirect from A to B, and at B
    we should see a redirect to C, and then finally a redirect back from
@@ -353,16 +364,20 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    auth scheme we should see:
 
    o  Server A would respond with a normal 3xx redirect to B, not a 401
-      authenticate-with-Redirect, and no Authorization or Authorization-
-      Request headers in the redirect response.
+      authenticate-with-Redirect, and no Authorization headers in the
+      redirect response.
 
    o  Server B would respond with a 401 authenticate-with-Redirect
-      response, no Authorization headers in its response, and (probably)
-      a Authorization-Request header in the response by which it might
-      send a signed request for authorization to the "/v0.mpg" resource.
+      response and (possibly) a Authorization header in the response by
+      which it might send a signed request for authorization to the
+      "/v0.mpg" resource.
 
-   o  Server C would check cookies and possibly respond with a 401 for
-      the user-agent to authenticate using some other scheme.
+   o  Server C would check any Authorization headers in the request and
+      possibly authenticate the user-agent somehow (e.g., using any
+      cookies sent by the user-agent, using client certificates in TLS,
+      by responding with a 401 for the user-agent to authenticate using
+      some HTTP scheme, a further Redirect or plain redirection, or by
+      interacting with the user if the user-agent is a browser).
 
    o  Once the user is authenticated, server C would check the user's
       authorization to access the resource ("/v0.mpg"), and if
@@ -370,29 +385,19 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
       header bearing a cryptographic token for B attesting to the user's
       authorization.
 
-   o  Since server C's redirection doubles back to a server (B) seen
-      earlier in the redirect chain, the user-agent would preserve the
-      Authorization header from the response, which means server B would
-      see it, verify its integrity, decode it, and then serve the
-      resource.
-
-   [[CREF5: Ah, but if server C wants to respond with HTML and
-   ECMAScript for a browser to evaluate as an aid to authentication,
-   what status code shall it use for that?  If a 2xx, then the redirect
-   chain will be broken, and the Authorization header in the final
-   redirect will not be preserved!  We could relax the rules for when to
-   preserve the Authorization header.  Or we could not reuse the
-   Authorization header for this, instead introducing Authorization-
-   Response, say, with Authorization-{Request, Response} always
-   preserved on redirects.  --NW]]
 
 
 
 
-Williams                 Expires October 4, 2020                [Page 7]
+Williams                Expires October 10, 2020                [Page 7]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
+
+   o  Finally, on the redirect back to B, the user-agent would preserve
+      the Authorization header from the response from C, which means
+      server B would see it, verify its integrity, decode it, and -if
+      the token grants access- then serve the resource.
 
 5.  Applicability
 
@@ -437,25 +442,24 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
    In the short-term, the HTTP auth scheme, Redirect, is not applicable
    to any existing protocols or applications.  However, existing
-   authentication and authorization systems, such as various Security
-   Assertion Markup Language (SAML) profiles, as well as OpenID Connect
-   (OIDC) and OAuth 2.0 [RFC6749] mechanisms in general, such as JWT
-   [RFC7519], can be adapted to use Redirect.  [[COMMENT_REFS_NEEDED0:
 
 
 
-
-Williams                 Expires October 4, 2020                [Page 8]
+Williams                Expires October 10, 2020                [Page 8]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
+   authentication and authorization systems, such as various Security
+   Assertion Markup Language (SAML) profiles, as well as OpenID Connect
+   (OIDC) and OAuth 2.0 [RFC6749] mechanisms in general, such as JWT
+   [RFC7519], can be adapted to use Redirect.  [[COMMENT_REFS_NEEDED0:
    Need to add references for SAML.  Bibxml does not have any entries
    for OASIS specs! --NW]]
 
    Specifically, it is better to use headers for communication between
    relying parties and auth services than it is to use URI query
-   parameters, as the latter imposes on application designeds.  Besides
+   parameters, as the latter imposes on application designers.  Besides
    this, the Redirect auth scheme can greatly simplify adding support
    for, e.g., JWT, even for non-browser applications.
 
@@ -490,6 +494,18 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    Note that many user-agents will not understand that such responses
    represent an option to authenticate with some authentication scheme.
 
+
+
+
+
+
+
+
+Williams                Expires October 10, 2020                [Page 9]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
 6.2.  401 Responses with Location
 
    If a server responds with a 401 and includes not just a WWW-
@@ -498,14 +514,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    via the server's authentication scheme offerings, or redirection.  In
    this case, a user-agent conforming to this specification SHALL
    consider the response to be either a redirect or a request to
-
-
-
-Williams                 Expires October 4, 2020                [Page 9]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
    authenticate, at the user-agent's choice, and SHOULD pick and execute
    one of those two options.  The user-agent SHOULD use the GET method
    at the new Location, with the expectation of eventually being
@@ -546,21 +554,20 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    user-agent does not include the Accept-Auth header in its request, we
    have no advice.  When a server supports multiple authentication
    schemes and the user-agent does include the Accept-Auth header in its
+
+
+
+Williams                Expires October 10, 2020               [Page 10]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
    request, then the server SHOULD select at least one scheme for a 401
    response's WWW-Authenticate header that the user-agent also supports,
    but the server MAY respond with a 3xx redirect response if the user-
    agent indicated support for redirects via the Accept-Redirect header
    or by advertising support for the Redirect HTTP authentication
    scheme.
-
-
-
-
-
-Williams                 Expires October 4, 2020               [Page 10]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
 
 9.  Acknowledgements
 
@@ -570,9 +577,8 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 10.  IANA Considerations
 
    IANA is requested to assign an expert to run the Expert Review for
-   the registration of the Accept-Auth, Accept-Redirect, Accept-
-   Redirect-Auth, and Authorization-Request headers in the message
-   header registry.
+   the registration of the Accept-Auth, Accept-Redirect, and Accept-
+   Redirect-Auth headers in the message header registry.
 
    Upon completion of IETF Review, IANA is directed to add the Redirect
    authentication scheme to the HTTP Authentication Scheme registry.
@@ -588,7 +594,7 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
 
    The Accept-Auth header is security-relevant as it helps negotiate
    authentication, which is a positive consideration.  Negative security
-   considerations include multi-level negotiation issues Section 11.1,
+   considerations include multi-level negotiation issues Section 11.2,
    as well as a privacy concern: that the Accept-Auth header may help
    fingerprint user-agents.
 
@@ -596,28 +602,37 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    authorities to use the new Accept-Auth, Accept-Redirect, and Accept-
    Redirect-Auth headers.
 
-   Also, the Authorization-Request and Authorization header preservation
-   behavior allows attackers to convey malformed tokens to victim
-   servers, allowing them to probe for parsing bugs.  However, this is
-   already true for the URI itself, therefore this is not a new issue.
-   Note that Authorization headers are not to be preserved in all
-   redirects, just those that backtrack in the redirect chain.  That
-   means that there can be no confusion as to whether a given
-   Authorization header was added by the user-agent or a redirecting
-   origin: it will be either, but never both, and the relying party
-   origins don't care which it is.
+11.1.  Security Considerations for the Redirect Auth Scheme
 
-   Adding support for channel / token binding to the Redirect HTTP auth
-   scheme may well be possible and desirable.  This would consist of
-   request headers set by the user-agent on redirected requests that
+   The Authorization header preservation behavior allows attackers to
+   convey malformed tokens to victim servers, allowing them to probe for
+   parsing bugs.  However, this is already true for the URI itself,
+   therefore this is not a new issue.
 
 
 
-Williams                 Expires October 4, 2020               [Page 11]
+
+
+Williams                Expires October 10, 2020               [Page 11]
 
 Internet-Draft           Accept-Auth & Redirect               April 2020
 
 
+   Open redirectors allow malicious redirects to sites that could set an
+   Authorization header on a redirect back to the site with the open
+   redirector.  This would allow an attacker to make a user thing they
+   are logged in as themselves when they are instead logged in as the
+   attacker, and then the victim user might get fooled into sending the
+   attacker sensitive information.  This is not a new problem, as it is
+   already a problem for auth systems, such as OIDC, that use URI query
+   parameters to convey cryptographic tokens ("codes" in OIDC parlance).
+
+   Open redirectors are a security vulnerability in general.  Servers
+   MUST NOT implement open redirects.
+
+   Adding support for channel / token binding to the Redirect HTTP auth
+   scheme may well be possible and desirable.  This would consist of
+   request headers set by the user-agent on redirected requests that
    would carry channel binding (CB) data for one or more CB types
    corresponding to the original origin (and/or previous hop).
 
@@ -631,14 +646,15 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    enabled).  User-agents SHOULD have local policy about which
    redirections they will accept, whether to authenticate to redirected
    authorities, and with what methods.  For example, a user-agent may be
-   willing to use the Negotiate authentication scheme at some or any
-   redirected authorities if it is happy to let Kerberos
-   implementations, including Key Distribution Centers (KDCs), apply
-   policy on the user-agent's behalf, but may not be willing to perform
-   Basic, Digest, or SCRAM authentication to any redirected authorities
-   not on a local whitelist.
+   willing to use the Negotiate [RFC4559] authentication scheme at some
+   or any redirected authorities if it is happy to let Kerberos
+   [RFC4121] implementations, including Key Distribution Centers (KDCs),
+   apply policy on the user-agent's behalf, but may not be willing to
+   perform Basic [RFC2617], Digest [RFC2617], or SCRAM [RFC7804]
+   authentication to any redirected authorities not on a local
+   whitelist.
 
-11.1.  Multi-Level Negotiation
+11.2.  Multi-Level Negotiation
 
    One important security consideration of the Accept-Auth header is
    that it may lead to multiple levels of negotiation (e.g., via the
@@ -650,6 +666,14 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    and Negotiate with some GSS-API [RFC2743] mechanism X, while the
    server might be able to use Digest and Negotiate with some GSS-API
    mechanism Y, and the server might prefer Y.  If the server knows only
+
+
+
+Williams                Expires October 10, 2020               [Page 12]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
    that the user-agent supports Digest and Negotiate, but not that the
    user-agent does not support GSS-API mechanism Y, then the server may
    send a challenge to use Negotiate and then the whole negotiation will
@@ -662,17 +686,8 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
    recover from sub-optimal selections.
 
    To avoid this failure more, user-agents SHOULD use auth-params to
-   convey information that the server might need to make an appropriate.
-
-
-
-
-
-
-Williams                 Expires October 4, 2020               [Page 12]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
+   convey information that the server might need to make an appropriate
+   selection.
 
 12.  References
 
@@ -704,6 +719,17 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
               RFC 7230, DOI 10.17487/RFC7230, June 2014,
               <https://www.rfc-editor.org/info/rfc7230>.
 
+
+
+
+
+
+
+Williams                Expires October 10, 2020               [Page 13]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
+
    [RFC7235]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Authentication", RFC 7235,
               DOI 10.17487/RFC7235, June 2014,
@@ -721,15 +747,6 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
               DOI 10.17487/RFC4120, July 2005,
               <https://www.rfc-editor.org/info/rfc4120>.
 
-
-
-
-
-Williams                 Expires October 4, 2020               [Page 13]
-
-Internet-Draft           Accept-Auth & Redirect               April 2020
-
-
    [RFC4121]  Zhu, L., Jaganathan, K., and S. Hartman, "The Kerberos
               Version 5 Generic Security Service Application Program
               Interface (GSS-API) Mechanism: Version 2", RFC 4121,
@@ -744,6 +761,10 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <https://www.rfc-editor.org/info/rfc7519>.
 
+   [RFC7804]  Melnikov, A., "Salted Challenge Response HTTP
+              Authentication Mechanism", RFC 7804, DOI 10.17487/RFC7804,
+              March 2016, <https://www.rfc-editor.org/info/rfc7804>.
+
 12.3.  URIs
 
    [1] https://docs.microsoft.com/en-
@@ -751,6 +772,19 @@ Internet-Draft           Accept-Auth & Redirect               April 2020
        webrequest?view=powershell-7
 
 Author's Address
+
+
+
+
+
+
+
+
+
+Williams                Expires October 10, 2020               [Page 14]
+
+Internet-Draft           Accept-Auth & Redirect               April 2020
+
 
    Nico Williams (editor)
    Cryptonector, LLC
@@ -781,4 +815,26 @@ Author's Address
 
 
 
-Williams                 Expires October 4, 2020               [Page 14]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Williams                Expires October 10, 2020               [Page 15]

@@ -13,6 +13,7 @@
   <!ENTITY RFC7230 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
   <!ENTITY RFC7235 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml">
   <!ENTITY RFC7519 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml">
+  <!ENTITY RFC7804 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7804.xml">
   <!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
   <!ENTITY InvokeWebRequest "https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-7">
 ]>
@@ -91,11 +92,11 @@
       <t>
         Also specified is a new HTTP authentication scheme named
         "Redirect" that enables communication between redirecting and
-        redirected authorities via preservation of "Authorization" and
-        "Authorization-Request" headers across redirections.  This
-        enables arbitrary authentication and authorization protocols to
-        work without requiring user-agent support for them and without
-        having to (ab)use URI query parameters.
+        redirected authorities via preservation of "Authorization"
+        headers across redirections.  This enables arbitrary
+        authentication and authorization protocols to work without
+        requiring user-agent support for them and without having to
+        (ab)use URI query parameters.
       </t>
     </abstract>
 
@@ -223,9 +224,9 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           It might be good to also specify request headers for
           redirected requests that user-agents can use for passing
           channel binding information to auth services.  E.g.,
-          Redirect-Channel-Binding: &lt;type&gt; &lt;cb-data&gt;.
-          This would allow Authorization tokens to be channel-bound.
-          Of course, there are difficulties here that would require
+          Authorization-Channel-Binding: &lt;type&gt; &lt;cb-data&gt;.
+          This would allow Authorization tokens to be channel-bound.  Of
+          course, there are difficulties here that would require
           additional thinking.  For example, using unique CB would
           require that the user-agent keep a connection open to the
           redirecting origin.  While end-point CB would fail if multiple
@@ -234,6 +235,16 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           the issuer, however, would work, but that would be a new CB
           type and would require registration in the IANA CB type
           registry.  CB support could always be added later.
+        </cref>
+        <cref anchor="COMMENT_CB1" source="NW">
+          Possible new CB types include: dNSName+hash(issuer-cert/SPKI),
+          some sort of TLS session ID possibly constructed using the TLS
+          key material exporter but derived in such a way that it
+          identifies a set of connections resumed from the same original
+          handshake.  The latter would be prone to failure on resumption
+          if the resumption ticket is rejected for any reason, but
+          otherwise would work really well for tokbind-style token
+          protocols, especially for user-agents that can retry.
         </cref>
       </t>
 
@@ -255,10 +266,9 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         scheme lets arbitrary authentication (and authorization)
         protocols exchange cryptographic messages between the relying
         party origin and the authenticator origin over headers rather
-        than URI parameters.  This is done by preserving a new header,
-        "Authorization-Request" across redirects, and the existing
-        "Authorization" header across redirects back to previous origins
-        in the redirect chain.
+        than URI parameters.  This is done by copying ("preserving") any
+        "Authorization" headers in a redirect response to the redirected
+        request.
       </t>
 
       <t>
@@ -308,16 +318,10 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           </t>
 
           <t>
-            User-agents that support the Redirect HTTP authentication
-            scheme MUST copy any Authorization-Request headers in redirect
-            responses to the redirected request.
-          </t>
-
-          <t>
-            User-agents that support the Redirect HTTP authentication
-            scheme MUST copy any Authorization headers in redirect
-            responses to the redirected request when the redirect is to
-            an origin seen earlier in the same redirect chain.
+            Unless rejected by local policy (or the user), user-agents
+            that support the Redirect HTTP authentication scheme MUST
+            copy any Authorization headers in redirect responses to the
+            redirected request.
           </t>
 
           <t>
@@ -325,9 +329,10 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
             has advertised support for the Redirect authentication scheme
             SHOULD respond with a 401 with a "challenge" for the Redirect
             authentication scheme and a Location header, and MAY include
-            an Authorization-Request header in the response that the
-            user-agent then MUST copy to the redirected request if it
-            chooses to follow the redirection.
+            an Authorization header in the response that the user-agent
+            then MUST copy to the redirected request if it chooses to
+            follow the redirection.  Servers MAY use a 3xx response
+            instead.
           </t>
 
           <t>
@@ -335,12 +340,15 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
             to decide:
 
             <list style="symbols">
-              <t>whether to accept redirections from the redirecting origin;</t>
+              <t>whether to accept redirections from the redirecting
+                origin (identified by the Referer header or by a
+                cryptographic token in the preserved Authorization
+                header);</t>
 
               <t>
                 whether to further redirect the request (as usual) and
-                whether to set an Authorization-Request header in the
-                redirect response;
+                whether to set an Authorization header in the redirect
+                response;
               </t>
 
               <t>whether to authenticate the user (as usual);</t>
@@ -377,11 +385,18 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
       <section anchor="redirect_examples" title="Redirect Examples">
         <t>
           Consider a URL https://janedoe.catvidhub.com.example/v0.mpg
-          which redirects to
+          which permanently redirects to
           https://janedoe.catvidhub.io.example/v0.mpg, and suppose the
           latter also wants to authenticate users via redirection to an
           authenticator at https://auth.catvidhub.nu.example/.  Let us
           label these A, B, and C respectively.
+        </t>
+
+        <t>
+          The first redirection in this example is not involved in
+          authentication, and is included only to show that a
+          redirection chain where only parts of it are involved in
+          authentication is possible.
         </t>
 
         <t>
@@ -395,22 +410,25 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
             <t>
               Server A would respond with a normal 3xx redirect to B,
               not a 401 authenticate-with-Redirect, and no Authorization
-              or Authorization-Request headers in the redirect response.
+              headers in the redirect response.
             </t>
 
             <t>
               Server B would respond with a 401
-              authenticate-with-Redirect response, no Authorization
-              headers in its response, and (probably) a
-              Authorization-Request header in the response by which it
-              might send a signed request for authorization to the
-              "/v0.mpg" resource.
+              authenticate-with-Redirect response and (possibly) a
+              Authorization header in the response by which it might
+              send a signed request for authorization to the "/v0.mpg"
+              resource.
             </t>
 
             <t>
-              Server C would check cookies and possibly respond with a
-              401 for the user-agent to authenticate using some other
-              scheme.
+              Server C would check any Authorization headers in the
+              request and possibly authenticate the user-agent somehow
+              (e.g., using any cookies sent by the user-agent, using
+              client certificates in TLS, by responding with a 401 for
+              the user-agent to authenticate using some HTTP scheme, a
+              further Redirect or plain redirection, or by interacting
+              with the user if the user-agent is a browser).
             </t>
 
             <t>
@@ -422,27 +440,14 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
             </t>
 
             <t>
-              Since server C's redirection doubles back to a server (B)
-              seen earlier in the redirect chain, the user-agent would
-              preserve the Authorization header from the response, which
-              means server B would see it, verify its integrity, decode
-              it, and then serve the resource.
+              Finally, on the redirect back to B, the user-agent would
+              preserve the Authorization header from the response from
+              C, which means server B would see it, verify its
+              integrity, decode it, and -if the token grants access-
+              then serve the resource.
             </t>
           </list>
         </t>
-
-        <t><cref source="NW">
-            Ah, but if server C wants to respond with HTML and
-            ECMAScript for a browser to evaluate as an aid to
-            authentication, what status code shall it use for that?  If
-            a 2xx, then the redirect chain will be broken, and the
-            Authorization header in the final redirect will not be
-            preserved!  We could relax the rules for when to preserve
-            the Authorization header.  Or we could not reuse the
-            Authorization header for this, instead introducing
-            Authorization-Response, say, with Authorization-{Request,
-            Response} always preserved on redirects.
-        </cref></t>
       </section>
     </section>
 
@@ -519,7 +524,7 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
           Specifically, it is better to use headers for communication
           between relying parties and auth services than it is to use
           URI query parameters, as the latter imposes on application
-          designeds.  Besides this, the Redirect auth scheme can greatly
+          designers.  Besides this, the Redirect auth scheme can greatly
           simplify adding support for, e.g., JWT, even for non-browser
           applications.
         </t>
@@ -656,9 +661,8 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
     <section title="IANA Considerations">
       <t>
         IANA is requested to assign an expert to run the Expert Review
-        for the registration of the Accept-Auth, Accept-Redirect,
-        Accept-Redirect-Auth, and Authorization-Request headers in the
-        message header registry.
+        for the registration of the Accept-Auth, Accept-Redirect, and
+        Accept-Redirect-Auth headers in the message header registry.
       </t>
       <t>
         Upon completion of IETF Review, IANA is directed to add the
@@ -691,47 +695,65 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         and Accept-Redirect-Auth headers.
       </t>
 
-      <t>
-        Also, the Authorization-Request and Authorization header
-        preservation behavior allows attackers to convey malformed
-        tokens to victim servers, allowing them to probe for parsing
-        bugs.  However, this is already true for the URI itself,
-        therefore this is not a new issue.  Note that Authorization
-        headers are not to be preserved in all redirects, just those
-        that backtrack in the redirect chain.  That means that there can
-        be no confusion as to whether a given Authorization header was
-        added by the user-agent or a redirecting origin: it will be
-        either, but never both, and the relying party origins don't care
-        which it is.
-      </t>
+      <section anchor="seccons_redir" title="Security Considerations for the Redirect Auth Scheme">
+        <t>
+          The Authorization header preservation behavior allows
+          attackers to convey malformed tokens to victim servers,
+          allowing them to probe for parsing bugs.  However, this is
+          already true for the URI itself, therefore this is not a new
+          issue.
+        </t>
 
-      <t>
-        Adding support for channel / token binding to the Redirect HTTP
-        auth scheme may well be possible and desirable.  This would
-        consist of request headers set by the user-agent on redirected
-        requests that would carry channel binding (CB) data for one or
-        more CB types corresponding to the original origin (and/or
-        previous hop).
-      </t>
+        <t>
+          Open redirectors allow malicious redirects to sites that could
+          set an Authorization header on a redirect back to the site
+          with the open redirector.  This would allow an attacker to
+          make a user thing they are logged in as themselves when they
+          are instead logged in as the attacker, and then the victim
+          user might get fooled into sending the attacker sensitive
+          information.  This is not a new problem, as it is already a
+          problem for auth systems, such as OIDC, that use URI query
+          parameters to convey cryptographic tokens ("codes" in OIDC
+          parlance).
+        </t>
 
-      <t>
-        One concern is that servers could cause user-agents to engage in
-        authentication schemes they shouldn't want to -- that is a
-        possibility regardless of whether the user-agent advertises
-        support for an authentication scheme or not.  As usual, local
-        policy is relevant.  For example, the "curl" user-agent by
-        default will not chase redirections, and if enabled, it will by
-        default not authenticate at any redirected authority (this can
-        be further enabled).  User-agents SHOULD have local policy about
-        which redirections they will accept, whether to authenticate to
-        redirected authorities, and with what methods.  For example, a
-        user-agent may be willing to use the Negotiate authentication
-        scheme at some or any redirected authorities if it is happy to
-        let Kerberos implementations, including Key Distribution Centers
-        (KDCs), apply policy on the user-agent's behalf, but may not be
-        willing to perform Basic, Digest, or SCRAM authentication to any
-        redirected authorities not on a local whitelist.
-      </t>
+        <t>
+          Open redirectors are a security vulnerability in general.
+          Servers MUST NOT implement open redirects.
+        </t>
+
+        <t>
+          Adding support for channel / token binding to the Redirect
+          HTTP auth scheme may well be possible and desirable.  This
+          would consist of request headers set by the user-agent on
+          redirected requests that would carry channel binding (CB) data
+          for one or more CB types corresponding to the original origin
+          (and/or previous hop).
+        </t>
+
+        <t>
+          One concern is that servers could cause user-agents to engage
+          in authentication schemes they shouldn't want to -- that is a
+          possibility regardless of whether the user-agent advertises
+          support for an authentication scheme or not.  As usual, local
+          policy is relevant.  For example, the "curl" user-agent by
+          default will not chase redirections, and if enabled, it will
+          by default not authenticate at any redirected authority (this
+          can be further enabled).  User-agents SHOULD have local policy
+          about which redirections they will accept, whether to
+          authenticate to redirected authorities, and with what methods.
+          For example, a user-agent may be willing to use the Negotiate
+          <xref target="RFC4559"/> authentication scheme at some or any
+          redirected authorities if it is happy to let Kerberos <xref
+            target="RFC4121"/> implementations, including Key
+          Distribution Centers (KDCs), apply policy on the user-agent's
+          behalf, but may not be willing to perform Basic <xref
+            target="RFC2617"/>, Digest <xref target="RFC2617"/>, or
+          SCRAM <xref target="RFC7804"/> authentication to any
+          redirected authorities not on a local whitelist.
+        </t>
+
+      </section>
 
       <section anchor="multi_level_nego" title="Multi-Level Negotiation">
         <t>
@@ -765,7 +787,7 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
         <t>
           To avoid this failure more, user-agents SHOULD use auth-params to
           convey information that the server might need to make an
-          appropriate.
+          appropriate selection.
         </t>
       </section>
     </section>
@@ -798,6 +820,7 @@ quoted-string = <quoted-string, see [RFC7230], Section 3.2.6>
       &RFC4121;
       &RFC6749;
       &RFC7519;
+      &RFC7804;
     </references>
   </back>
 </rfc>
